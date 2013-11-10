@@ -79,7 +79,7 @@ CWFLAGS += -Wsign-compare
 CAFLAGS += -Wa,-adhlns=$(@:%.o=%.lst)
 
 # include dirs
-CIFLAGS += -I. -I$(YAAL)/include $(patsubst %,-I%,$(EXTRAINCDIRS))
+CIFLAGS += -I. $(if $(YAAL),-I$(YAAL)/include,) $(patsubst %,-I%,$(EXTRAINCDIRS))
 
 
 
@@ -390,6 +390,7 @@ $(OBJDIR)/%.o : %.S
 # yaal specific
 $(OBJDIR)/yaal/%.o : $(YAAL)/%.cpp
 	$(BUILD_REQUIRE)
+	$(call require,YAAL)
 	@echo
 	@echo $(MSG_COMPILING_YAAL) $<
 	@mkdir -p $(dir $@)

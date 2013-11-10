@@ -49,25 +49,25 @@
 
 
 # Get yaal path from directory this file was included from
-YAAL := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
+YAAMAKE := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
 
 
 # Include boards, as that should define MCU and F_CLOCK, if BOARD is used
-include $(YAAL)/makefile.d/boards.mk
+include $(YAAMAKE)/makefile.d/boards.mk
 
 # Include defines about project environment
-include $(YAAL)/makefile.d/environment.mk
+include $(YAAMAKE)/makefile.d/environment.mk
 
 # Include yaal specific stuff
-include $(YAAL)/makefile.d/yaal.mk
+include $(YAAMAKE)/makefile.d/yaal.mk
 
 # Include all printed strings
-include $(YAAL)/makefile.d/messages.mk
+include $(YAAMAKE)/makefile.d/messages.mk
 
 # Include common targets.
-include $(YAAL)/makefile.d/common.mk
+include $(YAAMAKE)/makefile.d/common.mk
 
 # Include targets in categories
-include $(YAAL)/makefile.d/build.mk
-include $(YAAL)/makefile.d/debug.mk
-include $(YAAL)/makefile.d/program.mk
+include $(YAAMAKE)/makefile.d/build.mk
+include $(YAAMAKE)/makefile.d/debug.mk
+include $(YAAMAKE)/makefile.d/program.mk
