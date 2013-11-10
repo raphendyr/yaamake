@@ -63,15 +63,9 @@ TARGET_ARCH = -mmcu=$(MCU)
 # preprocessor options
 CPPFLAGS += -g$(DEBUG)
 CPPFLAGS += $(DEFS)
-ifdef F_CPU
-CPPFLAGS += -DF_CPU=$(patsubst %kHz,%000,$(patsubst %MHz,%000000,$(F_CPU:%UL=%)))UL
-endif
-ifdef F_CLOCK
-CPPFLAGS += -DF_CLOCK=$(patsubst %kHz,%000,$(patsubst %MHz,%000000,$(F_CLOCK:%UL=%)))UL
-endif
-ifdef YAAL_NO_INIT
-CPPFLAGS += -DYAAL_NO_INIT
-endif
+CPPFLAGS += $(if $(F_CPU),-DF_CPU=$(patsubst %kHz,%000,$(patsubst %MHz,%000000,$(F_CPU:%UL=%)))UL,)
+CPPFLAGS += $(if $(F_CLOCK),-DF_CLOCK=$(patsubst %kHz,%000,$(patsubst %MHz,%000000,$(F_CLOCK:%UL=%)))UL,)
+CPPFLAGS += $(if $(YAAL_NO_INIT),-DYAAL_NO_INIT,)
 CPPFLAGS += -MMD -MP -MF .dep/$(@F).d # generate dependency files.
 
 # optimizer options
@@ -225,7 +219,7 @@ build_help:
 
 # Target: build project
 .PHONY: build
-build: begin gccversion sizebefore elf hex eep lss sym sizeafter end
+build: begin gccversion sizebefore elf lss sym sizeafter end
 
 
 
@@ -236,19 +230,19 @@ clean: begin clean_list end
 clean_list:
 	@echo
 	@echo $(MSG_CLEANING)
-	$(REMOVE) $(TARGET).hex
-	$(REMOVE) $(TARGET).eep
-	$(REMOVE) $(TARGET).cof
-	$(REMOVE) $(TARGET).elf
-	$(REMOVE) $(TARGET).map
-	$(REMOVE) $(TARGET).sym
-	$(REMOVE) $(TARGET).lss
-	$(REMOVE) $(OBJ)
-	$(REMOVE) $(OBJ:%.o=%.lst)
-	$(REMOVE) $(addsuffix .s,$(basename $(SRC)))
-	$(REMOVE) $(addsuffix .d,$(basename $(SRC)))
-	$(REMOVE) $(addsuffix .i,$(basename $(SRC)))
-	$(REMOVE) $(addsuffix .m,$(basename $(SRC)))
+	$(if $(TARGET),$(REMOVE) $(TARGET).hex,)
+	$(if $(TARGET),$(REMOVE) $(TARGET).eep,)
+	$(if $(TARGET),$(REMOVE) $(TARGET).cof,)
+	$(if $(TARGET),$(REMOVE) $(TARGET).elf,)
+	$(if $(TARGET),$(REMOVE) $(TARGET).map,)
+	$(if $(TARGET),$(REMOVE) $(TARGET).sym,)
+	$(if $(TARGET),$(REMOVE) $(TARGET).lss,)
+	$(if $(OBJ),$(REMOVE) $(OBJ),)
+	$(if $(OBJ),$(REMOVE) $(OBJ:%.o=%.lst),)
+	$(if $(SRC),$(REMOVE) $(addsuffix .s,$(basename $(SRC))),)
+	$(if $(SRC),$(REMOVE) $(addsuffix .d,$(basename $(SRC))),)
+	$(if $(SRC),$(REMOVE) $(addsuffix .i,$(basename $(SRC))),)
+	$(if $(SRC),$(REMOVE) $(addsuffix .m,$(basename $(SRC))),)
 	$(REMOVEDIR) .dep
 
 
@@ -265,17 +259,19 @@ lib: lib$(TARGET).a
 
 
 # Display size of file.
-HEXSIZE = $(SIZE) --target=$(FORMAT) $(TARGET).hex
+# HEXSIZE = $(SIZE) --target=$(FORMAT) $(TARGET).hex
 ELFSIZE = $(SIZE) --mcu=$(MCU) --format=avr $(TARGET).elf
 
 .PHONY: sizebefore sizeafter
 sizebefore:
-	@if test -f $(TARGET).elf; then echo; echo $(MSG_SIZE_BEFORE); $(ELFSIZE); \
-	2>/dev/null; echo; fi
+	$(call require,TARGET)
+	$(if $(wildcard $(TARGET).elf),@echo $(MSG_SIZE_BEFORE),)
+	$(if $(wildcard $(TARGET).elf),$(ELFSIZE),)
 
 sizeafter:
-	@if test -f $(TARGET).elf; then echo; echo $(MSG_SIZE_AFTER); $(ELFSIZE); \
-	2>/dev/null; echo; fi
+	$(call require,TARGET)
+	$(if $(wildcard $(TARGET).elf),@echo $(MSG_SIZE_AFTER),)
+	$(if $(wildcard $(TARGET).elf),$(ELFSIZE),)
 
 
 
@@ -295,11 +291,13 @@ COFFCONVERT += --change-section-address .eeprom-0x810000
 
 .PHONY: coff extcoff
 coff: $(TARGET).elf
+	$(call require,TARGET)
 	@echo
 	@echo $(MSG_COFF) $(TARGET).cof
 	$(COFFCONVERT) -O coff-avr $< $(TARGET).cof
 
 extcoff: $(TARGET).elf
+	$(call require,TARGET)
 	@echo
 	@echo $(MSG_EXTENDED_COFF) $(TARGET).cof
 	$(COFFCONVERT) -O coff-ext-avr $< $(TARGET).cof
@@ -345,44 +343,54 @@ extcoff: $(TARGET).elf
 # Create library from object files.
 .SECONDARY : $(TARGET).a
 %.a: $(OBJ)
+	$(call require,SRC,$(SRC_ERROR_MSG))
+	$(call require,MCU OBJ TARGET)
 	@echo
 	@echo $(MSG_CREATING_LIBRARY) $@
 	$(AR) $@ $(OBJ)
 
 
-
 # Link: create ELF output file from object files.
 .SECONDARY : $(TARGET).elf
 %.elf: $(OBJ)
+	$(call require,SRC,$(SRC_ERROR_MSG))
+	$(call require,MCU OBJ TARGET)
 	@echo
 	@echo $(MSG_LINKING) $@
 	# LDLIBS needs to be after object files for some library stuff to work correctly
 	$(LINK.o) -o $@ $^ $(LDLIBS)
 
 
-
 # Compile: create object files from C, C++ and assembly source files.
 .PRECIOUS : $(OBJ)
+override BUILD_REQUIRE = $(call require,MCU F_CPU)
+$(OBJDIR)/%.o : $(OBJDIR)
+$(OBJDIR)/yaal/%.o : $(OBJDIR)
+
 
 $(OBJDIR)/%.o : %.c
+	$(BUILD_REQUIRE)
 	@echo
 	@echo $(MSG_COMPILING) $<
 	@mkdir -p $(dir $@)
 	$(COMPILE.c) -c -o $@ $<
 
 $(OBJDIR)/%.o : %.cpp
+	$(BUILD_REQUIRE)
 	@echo
 	@echo $(MSG_COMPILING_CPP) $<
 	@mkdir -p $(dir $@)
 	$(COMPILE.cc) -c -o $@ $<
 
 $(OBJDIR)/%.o : %.cc
+	$(BUILD_REQUIRE)
 	@echo
 	@echo $(MSG_COMPILING_CPP) $<
 	@mkdir -p $(dir $@)
 	$(COMPILE.cc) -c -o $@ $<
 
 $(OBJDIR)/%.o : %.S
+	$(BUILD_REQUIRE)
 	@echo
 	@echo $(MSG_ASSEMBLING) $<
 	@mkdir -p $(dir $@)
@@ -390,6 +398,7 @@ $(OBJDIR)/%.o : %.S
 
 # yaal specific
 $(OBJDIR)/yaal/%.o : $(YAAL)/%.cpp
+	$(BUILD_REQUIRE)
 	@echo
 	@echo $(MSG_COMPILING_YAAL) $<
 	@mkdir -p $(dir $@)
@@ -398,34 +407,43 @@ $(OBJDIR)/yaal/%.o : $(YAAL)/%.cpp
 
 # Compile: create assembler files from C and C++ source files.
 %.s : %.c
+	$(BUILD_REQUIRE)
 	$(COMPILE.c) -S -o $@ $<
 
 %.s : %.cpp
+	$(BUILD_REQUIRE)
 	$(COMPILE.cc) -S -o $@ $<
 
 %.s : %.cc
+	$(BUILD_REQUIRE)
 	$(COMPILE.cc) -S -o $@ $<
 
 
 # Create preprocessed source for use in sending a bug report.
 %.i : %.c
+	$(BUILD_REQUIRE)
 	$(COMPILE.c) -E -o $@ $<
 
 %.i : %.cpp
+	$(BUILD_REQUIRE)
 	$(COMPILE.cc) -E -o $@ $<
 
 %.i : %.cc
+	$(BUILD_REQUIRE)
 	$(COMPILE.cc) -E -o $@ $<
 
 
 # Create list of defined macros
 %.m : %.c
+	$(BUILD_REQUIRE)
 	$(COMPILE.c) -dM -E -o $@ $<
 
 %.m : %.cpp
+	$(BUILD_REQUIRE)
 	$(COMPILE.cc) -dM -E -o $@ $<
 
 %.m : %.cc
+	$(BUILD_REQUIRE)
 	$(COMPILE.cc) -dM -E -o $@ $<
 
 
@@ -435,7 +453,8 @@ $(OBJDIR)/yaal/%.o : $(YAAL)/%.cpp
 #======================================
 
 # Create object files directory
-$(shell mkdir $(OBJDIR) 2>/dev/null)
+$(OBJDIR):
+	mkdir $(OBJDIR)
 
 
 

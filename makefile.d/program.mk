@@ -1,75 +1,23 @@
-# FIXME: this file requires updates
-
-# If no other programmer is set
-PROGRAMMER ?= avrdude
-
 # programming help
 program_help:
 	$(HELP_TITTLE) programming
 	$(HELP_DESC) "This section is used to flash your code into your board/mcu"
 	$(HELP_ATTRS)
-	$(HELP_ATTR) PROGRAMMER "select programming backend to use (avrdude|teensy)"
-	$(HELP_ATTR) AVRDUDE_PROGRAMMER "avrdude programmer (eq. stk500v2)"
+	$(HELP_ATTR) PROGRAMMER "select programming device (arduino,stk500v2,teensy,etc)"
+	$(HELP_ATTR) AVRDUDE "Location of avrdude program"
 	$(HELP_ATTR) AVRDUDE_PORT "avrdude programmer connection port"
+	$(HELP_ATTR) AVRDUDE_FLAGS "Flags for avrdude backend (use +=)"
+	$(HELP_ATTR) TEENSY "Location of teensy_loader_cli (one is build if not specified by user)"
+	$(HELP_ATTR) TEENSY_FLAGS "Flags for teensy backend (use +=)"
 	$(HELP_TARGETS)
-	$(HELP_TARGET) program "flash your programmer"
+	$(HELP_TARGET) program_flash "flash your program (code) into device"
+	$(HELP_TARGET) program "alias for program_flash"
+	$(HELP_TARGET) program_eeprom "flash eeprom into your device"
 
 
 
-#--------- avrdude ---------
-ifeq ($(PROGRAMMER),avrdude)
-#---------------------------
-
-# avrdude executable
-AVRDUDE ?= avrdude
-
-# Programming hardware
-# Type: avrdude -c ?
-# to get a full listing.
-#
-AVRDUDE_PROGRAMMER ?= stk500v2
-
-# com1 = serial port. Use lpt1 to connect to parallel port.
-AVRDUDE_PORT ?= com1    # programmer connected to serial device
-
-AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
-#AVRDUDE_WRITE_EEPROM = -U eeprom:w:$(TARGET).eep
-
-
-# Uncomment the following if you want avrdude's erase cycle counter.
-# Note that this counter needs to be initialized first using -Yn,
-# see avrdude manual.
-#AVRDUDE_ERASE_COUNTER = -y
-
-# Uncomment the following if you do /not/ wish a verification to be
-# performed after programming the device.
-#AVRDUDE_NO_VERIFY = -V
-
-# Increase verbosity level.  Please use this when submitting bug
-# reports about avrdude. See <http://savannah.nongnu.org/projects/avrdude> 
-# to submit bug reports.
-#AVRDUDE_VERBOSE = -v -v
-
-AVRDUDE_FLAGS = -p $(MCU) -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
-AVRDUDE_FLAGS += $(AVRDUDE_NO_VERIFY)
-AVRDUDE_FLAGS += $(AVRDUDE_VERBOSE)
-AVRDUDE_FLAGS += $(AVRDUDE_ERASE_COUNTER)
-
-
-# Program the device.  
-.PHONY: program
-program: $(TARGET).hex $(TARGET).eep
-	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH) $(AVRDUDE_WRITE_EEPROM)
-
-
-endif
-# end, avrdude
-
-
-
-#--------- teensy ---------
 ifeq ($(PROGRAMMER),teensy)
-# -------------------------
+#--------- teensy ---------
 
 TEENSY := $(YAAL)/vendor/teensy/teensy_loader_cli/teensy_loader_cli
 TEENSY_FLAGS = -v -w -mmcu=$(MCU)
@@ -84,12 +32,35 @@ $(TEENSY): $(TEENSY).c
 endif
 
 
-program: $(TARGET).hex $(TEENSY)
+program_flash: $(TARGET).hex $(TEENSY)
+	$(call require,MCU TARGET)
 	$(TEENSY) $(TEENSY_FLAGS) $<
 
 
+
+else
+#--------- avrdude ---------
+
+AVRDUDE ?= avrdude
+
+AVRDUDE_PORT ?= usb
+
+AVRDUDE_FLAGS = -p $(MCU) -P $(PROGRAMMER_PORT) -c $(PROGRAMMER)
+
+.PHONY: program_flash
+program_flash: $(TARGET).hex
+	$(call require,AVRDUDE MCU TARGET PROGRAMMER PROGRAMMER_PORT)
+	$(AVRDUDE) $(AVRDUDE_FLAGS) -U flash:w:$<
+
+.PHONY: program_eeprom
+program_eeprom: $(TARGET).eep
+	$(call require,AVRDUDE MCU TARGET PROGRAMMER PROGRAMMER_PORT)
+	$(AVRDUDE) $(AVRDUDE_FLAGS) -U eeprom:w:$<
+
+
+
 endif
-# end, teensy
 
-#============================================================================
-
+#--------- common ---------
+.PHONY: program
+program: program_flash

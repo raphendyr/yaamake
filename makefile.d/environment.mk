@@ -6,9 +6,7 @@
 #   For eq. when you set cpu prescaler to 2 then F_CPU = F_CLOCK / 2
 #   This information is known for dirrefent boards, so F_CPU defaults to it
 #   as normally you want to run with full speed.
-ifdef F_CLOCK
-F_CPU ?= $(F_CLOCK)
-endif
+# F_CLOCK
 
 
 # Processor frequency.
@@ -17,19 +15,14 @@ endif
 #   variable to same clock speed.  The _delay_ms() macro uses this, and many
 #   examples use this variable to calculate timings.  Do not add a "UL" here.
 #   Yaal handles setting the processor speed if F_CLOCK and F_CPU are both set.
-#F_CPU = 16000000
-ifndef F_CPU
-$(error You need to define F_CPU before including yaal makefile.)
-endif
+# F_CPU
+F_CPU ?= $(F_CLOCK)
 
 
 # MCU name
 #   you MUST set this to match the chip you are using
 #   If you use BOARD option, this is set for you.
-#MCU = atmega8
-ifndef MCU
-$(error You need to define MCU before including yaal makefile.)
-endif
+# MCU
 
 
 
@@ -46,10 +39,7 @@ TARGET ?= $(shell basename $(shell pwd))
 SRC_MAIN = $(word 1,$(foreach base,main $(TARGET),$(foreach ext,.c .cpp .cc .S,$(wildcard $(base)$(ext)))))
 SRC ?= $(SRC_MAIN)
 
-# Test that at least something is included
-ifeq ($(SRC),)
-$(error No file matching main.* nor TARGET.* were found, also no SRC was specified in Makefile (before include))
-endif
+override SRC_ERROR_MSG = "No file matching main.* nor TARGET.* were found, also no SRC was specified in Makefile."
 
 
 
