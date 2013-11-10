@@ -3,7 +3,7 @@
 # This is YAAL makefile system. This makefile is splitted in multiple sources
 # for easier code maintainability.
 #
-# Orginally these imakefiles have been WinAVR Makefile Template written by
+# Originally these makefiles have been WinAVR Makefile Template written by
 # Eric B. Weddington, Jörg Wunsch, et al. which was released to the
 # Public Domain
 #
@@ -67,7 +67,7 @@ include $(YAAL)/makefile.d/messages.mk
 # Include common targets.
 include $(YAAL)/makefile.d/common.mk
 
-# Include targets in gategories
+# Include targets in categories
 include $(YAAL)/makefile.d/build.mk
 include $(YAAL)/makefile.d/debug.mk
 include $(YAAL)/makefile.d/program.mk

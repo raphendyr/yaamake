@@ -29,17 +29,6 @@ OPT ?= 2
 #     AVR [Extended] COFF format requires stabs, plus an avr-objcopy run.
 DEBUG ?= dwarf-2
 
-# List any extra directories to look for include files here.
-#     Each directory must be seperated by a space.
-#     Use forward slashes for directory separators.
-#     For a directory that has spaces, enclose it in quotes.
-#EXTRAINCDIRS +=
-
-# List any extra directories to look for libraries here.
-#     Each directory must be seperated by a space.
-#     Use forward slashes for directory separators.
-#     For a directory that has spaces, enclose it in quotes.
-#EXTRALIBDIRS +=
 
 
 
@@ -212,6 +201,8 @@ build_help:
 	$(HELP_ATTRS)
 	$(HELP_ATTR) SRC "list of sourcefiles (main.* and TARGET.* are used if none given)"
 	$(HELP_ATTR) TARGET "target filename prefix, seults TARGET.hex etc. (we use current directory name if none given"
+	$(HELP_ATTR) EXTRAINCDIRS "Any extra directories to look for include files."
+	$(HELP_ATTR) EXTRALIBDIRS "Any extra directories to look for libraries."
 	$(HELP_TARGETS)
 	$(HELP_TARGET) build "build project files"
 	$(HELP_TARGET) clean "clean build files"
