@@ -1,7 +1,7 @@
 # -*- makefile -*-
 #----------------------------------------------------------------------------
-# This is YAAL makefile system. This makefile is splitted in multiple sources
-# for easier code maintainability.
+# This is yaamake's makefile system. This makefile is splitted in multiple
+# sources for easier code maintainability.
 #
 # Originally these makefiles have been WinAVR Makefile Template written by
 # Eric B. Weddington, Jörg Wunsch, et al. which was released to the
@@ -33,7 +33,6 @@
 # make extcoff = Convert ELF to AVR Extended COFF.
 #
 # make program = Download the hex file to the device, using avrdude.
-#                Please customize the avrdude settings below first!
 #
 # make debug = Start either simulavr or avarice as specified for debugging, 
 #              with avr-gdb or avr-insight as the front end for debugging.
@@ -48,7 +47,7 @@
 #----------------------------------------------------------------------------
 
 
-# Get yaal path from directory this file was included from
+# Get our path from directory this file was included from
 YAAMAKE := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
 
 
@@ -58,7 +57,7 @@ include $(YAAMAKE)/makefile.d/boards.mk
 # Include defines about project environment
 include $(YAAMAKE)/makefile.d/environment.mk
 
-# Include yaal specific stuff
+# Find yaal and include it's makefiles
 include $(YAAMAKE)/makefile.d/yaal.mk
 
 # Include all printed strings

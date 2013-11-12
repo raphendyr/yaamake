@@ -4,7 +4,7 @@
 # Standard
 CSTANDARD ?= -std=c99
 
-# yaal requires c++11
+# yaal requires c++11, so we default to it
 CXXSTANDARD ?= -std=c++11
 
 # Place your -D or -U options here
@@ -54,7 +54,6 @@ CPPFLAGS += -g$(DEBUG)
 CPPFLAGS += $(DEFS)
 CPPFLAGS += $(if $(F_CPU),-DF_CPU=$(patsubst %kHz,%000,$(patsubst %MHz,%000000,$(F_CPU:%UL=%)))UL,)
 CPPFLAGS += $(if $(F_CLOCK),-DF_CLOCK=$(patsubst %kHz,%000,$(patsubst %MHz,%000000,$(F_CLOCK:%UL=%)))UL,)
-CPPFLAGS += $(if $(YAAL_NO_INIT),-DYAAL_NO_INIT,)
 CPPFLAGS += -MMD -MP -MF .dep/$(@F).d # generate dependency files.
 
 # optimizer options
@@ -79,7 +78,7 @@ CWFLAGS += -Wsign-compare
 CAFLAGS += -Wa,-adhlns=$(@:%.o=%.lst)
 
 # include dirs
-CIFLAGS += -I. $(if $(YAAL),-I$(YAAL)/include,) $(patsubst %,-I%,$(EXTRAINCDIRS))
+CIFLAGS += -I. $(patsubst %,-I%,$(EXTRAINCDIRS))
 
 
 
@@ -356,7 +355,6 @@ extcoff: $(TARGET).elf
 .PRECIOUS : $(OBJ)
 override BUILD_REQUIRE = $(call require,MCU F_CPU)
 $(OBJDIR)/%.o : $(OBJDIR)
-$(OBJDIR)/yaal/%.o : $(OBJDIR)
 
 
 $(OBJDIR)/%.o : %.c
@@ -386,15 +384,6 @@ $(OBJDIR)/%.o : %.S
 	@echo $(MSG_ASSEMBLING) $<
 	@mkdir -p $(dir $@)
 	$(COMPILE.S) -c -o $@ $<
-
-# yaal specific
-$(OBJDIR)/yaal/%.o : $(YAAL)/%.cpp
-	$(BUILD_REQUIRE)
-	$(call require,YAAL)
-	@echo
-	@echo $(MSG_COMPILING_YAAL) $<
-	@mkdir -p $(dir $@)
-	$(COMPILE.cc) -c -o $@ $<
 
 
 # Compile: create assembler files from C and C++ source files.
