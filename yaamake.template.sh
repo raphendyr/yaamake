@@ -56,19 +56,21 @@ MAKEFILE
 MAKEFILE
     fi
 
-    if [ "$yaal" ]; then
-        cat >> Makefile <<MAKEFILE
-# Base path of yaal
-YAAL := "$yaal"
+    echo "# Here happens all the magic" >> Makefile
 
-MAKEFILE
+    if [ "$yaal" ]; then
+        echo "YAAL := \"$yaal\"" >> Makefile
+    fi
+
+    if [ "$yaamake_path" ]; then
+        echo "include ${yaamake_path}/makefile.ext" >> Makefile
+    else
+        echo "include \$(shell yaamake --include-path)" >> Makefile
     fi
 
     cat >> Makefile <<MAKEFILE
-# include yaamake's makefile
-include \$(shell $0 --include-path)
 
-# run 'make help' for more information
+# run 'make help' for information
 MAKEFILE
 
     [ "$git_root" ] && git add Makefile 2>/dev/null || true
@@ -123,7 +125,17 @@ create_yaal_main() {
 }
 
 init_project() {
-    git_root=$(git rev-parse --show-toplevel 2>/dev/null || true)
+    if [ "${0#*/}" != "$0" ]; then
+        yaamake_path=${0%/*}
+        yaamake_p=$(readlink -e "$yaamake_path")
+        if [ "$git_root" ] && [ "${yaamake_p#$git_root}" = "${yaamake_p}" ]; then
+            echo "You are executing yaamake out side of your project directory."
+            echo "This would result setup where others could build the code."
+            echo "Add yaamake as submodule or require installation instead."
+            echo "For adding submodule run: git submodule add https://github.com/raphendyr/yaamake.git vendor/yaamake"
+            exit 1
+        fi
+    fi
     yaal_cmd=$(yaal --base-path 2>/dev/null || true)
     if [ "$git_root" ]; then
         initial=$(git status | grep -q -s '^# Initial commit$' && echo yes)
@@ -153,6 +165,8 @@ init_project() {
     return 1
 }
 
+git_root=$(git rev-parse --show-toplevel 2>/dev/null || true)
+[ "$git_root" ] && git_root=$(readlink -e "$git_root")
 action=
 yaal=
 make_initial=false
@@ -174,6 +188,14 @@ while [ "$1" ]; do
             else
                 yaal=$2
                 shift
+            fi
+            yaal_p=$(readlink -e "$yaal")
+            if [ "$git_root" ] && [ "${yaal_p#$git_root}" = "${yaal_p}" ]; then
+                echo "You are linking to yaal, which is outside of your project directory."
+                echo "This would result setup where others could build the code."
+                echo "Add yaal ad submodule or require installation instead."
+                echo "For adding submodule run: git submodule add https://github.com/raphendyr/yaal.git vendor/yaal"
+                exit 1
             fi
             ;;
         *)
