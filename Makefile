@@ -69,3 +69,13 @@ uninstall:
 	-rmdir $(LIBDIR)
 	# uninstall inary components
 	-rm -f $(BINDIR)/$(TARGET)
+
+
+.PHONY: test
+test:
+	@for d in tests/*; do \
+		echo -n "$${d##*/}: " && ( \
+			cd $$d && \
+			make >/dev/null 2>&1 && echo ok || echo fail ; \
+			make clean >/dev/null 2>&1 || true ; \
+		); done
