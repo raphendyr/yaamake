@@ -8,9 +8,10 @@ usage() {
     echo "  actions:"
     echo "       --include-path  - print filename to be included by Makefile"
     echo "    -i --init-project  - create initial files for your project (Makefile)"
+    echo "       --make-initial  - Allow uncommited changes on working tree"
     echo
     echo "  options:"
-    echo "    -Y --yaal          - yaal base dir if there is no yaal command in PATH"
+    echo "    -Y --yaal YAAL     - yaal base dir if there is no yaal command in PATH"
 }
 
 create_makefile() {
@@ -126,17 +127,19 @@ init_project() {
     yaal_cmd=$(yaal --base-path 2>/dev/null || true)
     if [ "$git_root" ]; then
         initial=$(git status | grep -q -s '^# Initial commit$' && echo yes)
-        if [ "$initial" ]; then
-            if git status | grep -q -s '^# Changes to be committed:$'; then
-                echo "You have initial commit in progress."
-                echo "Please finish it before running this command."
-                exit 1
-            else
-                git commit -m "Initial" --allow-empty >/dev/null
-                echo "Created empty initial commit."
+        if ! $make_initial; then
+            if [ "$initial" ]; then
+                if git status | grep -q -s '^# Changes to be committed:$'; then
+                    echo "You have initial commit in progress."
+                    echo "Please finish it before running this command."
+                    exit 1
+                else
+                    git commit -m "Initial" --allow-empty >/dev/null
+                    echo "Created empty initial commit."
+                fi
             fi
+            stashed=$(git stash | grep -q -s Saved && echo yes)
         fi
-        stashed=$(git stash | grep -q -s Saved && echo yes)
     fi
     if create_makefile && create_gitignore && create_yaal_main; then
         if [ "$git_root" ] && git status | grep "Changes to be committed"; then
@@ -152,6 +155,7 @@ init_project() {
 
 action=
 yaal=
+make_initial=false
 while [ "$1" ]; do
     case "$1" in
         --include-path)
@@ -161,9 +165,16 @@ while [ "$1" ]; do
         --init-project|-i)
             action=init_project
             ;;
-        --yaal|-Y)
-            yaal=$2
-            shift
+        --make-initial)
+            make_initial=true
+            ;;
+        --yaal|--yaal=*|-Y|-Y=*)
+            if [ "${1#*=}" ]; then
+                yaal=${1#*=}
+            else
+                yaal=$2
+                shift
+            fi
             ;;
         *)
             echo "ERROR: invalid argument: $1"
