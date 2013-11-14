@@ -5,17 +5,20 @@ BINDIR = $(PREFIX)/bin
 LIBDIR = $(PREFIX)/lib/$(TARGET)
 LIBDIR_INT = $(PREFIX_INT)/lib/$(TARGET)
 VERSION := $(shell cat VERSION)
+RELEASE := $(shell git describe)
 TEENSY := vendor/teensy/teensy_loader_cli/teensy_loader_cli
 
 .DEFAULT_GOAL := build
 
 
+TARGET_SEDS += -e 's/@@RELEASE@@/$(RELEASE)/g'
+
 $(TARGET): $(TARGET).template.sh
-	sed -e 's#@@LIBDIR@@#$(shell pwd)#g' $< > $@
+	sed -e 's#@@LIBDIR@@#$(shell pwd)#g' $(TARGET_SEDS) $< > $@
 	chmod +x $@
 
 $(TARGET)_install: $(TARGET).template.sh
-	sed -e 's#@@LIBDIR@@#$(LIBDIR_INT)#g' $< > $@
+	sed -e 's#@@LIBDIR@@#$(LIBDIR_INT)#g' $(TARGET_SEDS) $< > $@
 	chmod +x $@
 
 ifeq ($(NO_TEENSY),)
