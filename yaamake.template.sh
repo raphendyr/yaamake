@@ -2,8 +2,17 @@
 
 LIBDIR="@@LIBDIR@@"
 
+name=${0##*/}
+if [ "${0##*/}" = "$0" ]; then
+    installed=true
+elif [ "$(which $name)" = "$0" ]; then
+    installed=true
+else
+    installed=false
+fi
+
 usage() {
-    echo "usage: $0 [action] [options]"
+    echo "usage: $name [action] [options]"
     echo
     echo "  actions:"
     echo "       --include-path  - print filename to be included by Makefile"
@@ -118,10 +127,10 @@ MAKEFILE
         echo "YAAL := \"$yaal\"" >> Makefile
     fi
 
-    if [ "$yaamake_path" ]; then
-        echo "include ${yaamake_path}/makefile.ext" >> Makefile
-    else
+    if $installed; then
         echo "include \$(shell yaamake --include-path --require $(list_versions | sort -n | tail -n 1))" >> Makefile
+    else
+        echo "include ${yaamake_path}/makefile.ext" >> Makefile
     fi
 
     cat >> Makefile <<MAKEFILE
@@ -181,7 +190,7 @@ create_yaal_main() {
 }
 
 init_project() {
-    if [ "${0#*/}" != "$0" ]; then
+    if ! $installed; then
         yaamake_path=${0%/*}
         yaamake_p=$(readlink -e "$yaamake_path")
         if [ "$git_root" ] && [ "${yaamake_p#$git_root}" = "${yaamake_p}" ]; then
