@@ -66,3 +66,6 @@ COPY = cp
 ARCH := $(shell uname -p)
 # FIXME: I'm sure that there is better way to do this
 LANG := $(shell locale | grep -E '^(LANG|LANGUAGE|LC_MESSAGES|LC_ALL)' | cut -d '=' -f 2 | tr -d '"' | tr '[\n-_:]' ' ' | cut -d ' ' -f 1)
+
+# find file from path libdir/version:libdir:.
+find_file = $(firstword $(foreach path,$(YAAMAKE)/$(1) $(YAAMAKE)/../$(1) $(1),$(wildcard $(realpath $(path)))))
