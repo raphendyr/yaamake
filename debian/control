@@ -1,0 +1,39 @@
+Source: yaamake
+Section: electronics
+Priority: extra
+Maintainer: Jaakko Kantojärvi <jaakko@n-1.fi>
+Build-Depends: debhelper (>= 8.0.0), libusb-dev
+Standards-Version: 3.9.3
+Homepage: https://github.com/raphendyr/yaamake
+Vcs-Git: git://github.com/raphendyr/yaamake.git
+Vcs-Browser: https://github.com/raphendyr/yaamake
+
+Package: yaamake
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}, yaamake-makefiles
+Recommends: git
+Description: Makefile system to build and program AVR projects
+ Yaamake is handy makefile system to be used with gnu make
+ for building and programming AVR projects. IT allows you to
+ write simple Makefile with few variable definitions and
+ upplies lot of defined targets (actions).
+ .
+ Yaamake is mainly used by Yaal project, but it's also
+ very useful separately.
+ .
+ This package contains tool to find location of actual makefiles.
+
+Package: yaamake-doc
+Architecture: all
+Description: documentation for yaamake
+ <insert long description, indented with spaces>
+
+Package: yaamake-makefiles1
+Architecture: all
+Provides: yaamake-makefiles
+Depends: make, avrdude, gcc-avr (>= 1:4.7.0)
+Recommends: teensy-loader-cli
+Description: Actual makefiles for yaamake
+ This package contains one version of yaamake's makefile system.
+ You can have multiple different versions of these installed.
+ Command yaamake is used to return path to one of these makefiles.
