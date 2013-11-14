@@ -3,3 +3,9 @@
 yaamake
 yaamake_install
 vendor/teensy/teensy_loader_cli
+debian/*.ex
+debian/files
+debian/*.debhelper.log
+debian/*.substvars
+debian/yaamake*/
+dist/
