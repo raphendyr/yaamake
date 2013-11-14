@@ -19,7 +19,7 @@ program_help:
 ifeq ($(PROGRAMMER),teensy)
 #--------- teensy ---------
 
-TEENSY := $(YAAMAKE)/vendor/teensy/teensy_loader_cli/teensy_loader_cli
+TEENSY := $(call find_file,vendor/teensy/teensy_loader_cli/teensy_loader_cli)
 TEENSY_FLAGS = -v -w -mmcu=$(MCU)
 
 $(TEENSY):

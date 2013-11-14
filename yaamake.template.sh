@@ -8,11 +8,67 @@ usage() {
     echo "  actions:"
     echo "       --include-path  - print filename to be included by Makefile"
     echo "    -i --init-project  - create initial files for your project (Makefile)"
-    echo "       --make-initial  - Allow uncommited changes on working tree"
+    echo "       --list-versions - List installed versions"
     echo
     echo "  options:"
     echo "    -Y --yaal YAAL     - yaal base dir if there is no yaal command in PATH"
+    echo "       --make-initial  - Allow uncommited changes on working tree"
+    echo "    -R --require X.Y   - Require version to be at least X.Y, but less than (X+1).0"
 }
+
+
+## include-path & list-versions
+
+require_version() {
+    req=$1
+    # possible versions come from stdin
+
+    major=${req%%.*}
+    minor=
+    [ "$major" != "$req" ] && minor=${req#*.} && minor=${minor%%.*}
+
+    if [ "$minor" ]; then
+        # required with major and minor version
+        awk -F. '{ if ($1 == '$major' && $2 >= '$minor') print $0 }' | sort -n | tail -n 1
+    elif [ "$major" ]; then
+        # required with major version
+        awk -F. '{ if ($1 >= '$major') print $0}' | sort -n | tail -n 1
+    else
+        # newest, no requirement
+        sort -n | tail -n 1
+    fi
+}
+
+list_versions() {
+    if [ -e "${LIBDIR}/makefile.ext" ]; then
+        cat "${LIBDIR}/VERSION"
+    else
+        ls "${LIBDIR}" | grep -E '^([0-9]+.?)+$'
+    fi
+}
+
+include_path() {
+    if [ -e "${LIBDIR}/makefile.ext" ]; then
+        version=$(list_versions | require_version "$require")
+        if [ "$version" ]; then
+            echo "${LIBDIR}/makefile.ext"
+        else
+            echo "${LIBDIR}/makefile_has_invalid_version"
+        fi
+    else
+        version=$(list_versions | require_version "$require")
+        if [ "$version" ]; then
+            echo "${LIBDIR}/${version}/makefile.ext"
+        else
+            echo "${LIBDIR}/${version}/no_makefile_with_valid_version_found"
+            exit 1
+        fi
+    fi
+    exit 0
+}
+
+
+## init-project
 
 create_makefile() {
     # Makefile
@@ -65,7 +121,7 @@ MAKEFILE
     if [ "$yaamake_path" ]; then
         echo "include ${yaamake_path}/makefile.ext" >> Makefile
     else
-        echo "include \$(shell yaamake --include-path)" >> Makefile
+        echo "include \$(shell yaamake --include-path --require $(list_versions | sort -n | tail -n 1))" >> Makefile
     fi
 
     cat >> Makefile <<MAKEFILE
@@ -165,16 +221,31 @@ init_project() {
     return 1
 }
 
+
+
+## Argument parsing
+
 git_root=$(git rev-parse --show-toplevel 2>/dev/null || true)
 [ "$git_root" ] && git_root=$(readlink -e "$git_root")
 action=
-yaal=
+require=
 make_initial=false
+yaal=
 while [ "$1" ]; do
     case "$1" in
         --include-path)
-            echo "$LIBDIR/makefile.ext"
-            exit 0
+            action=include_path
+            ;;
+        --list-versions)
+            action=list_versions
+            ;;
+        --require|--require=*|-R|-R=*)
+            if [ "${1#*=}" != "$1" ]; then
+                require=${1#*=}
+            else
+                require=$2
+                shift
+            fi
             ;;
         --init-project|-i)
             action=init_project
@@ -183,7 +254,7 @@ while [ "$1" ]; do
             make_initial=true
             ;;
         --yaal|--yaal=*|-Y|-Y=*)
-            if [ "${1#*=}" ]; then
+            if [ "${1#*=}" != "$1" ]; then
                 yaal=${1#*=}
             else
                 yaal=$2
