@@ -1,6 +1,7 @@
 #!/bin/sh
 
 LIBDIR="@@LIBDIR@@"
+RELEASE="@@RELEASE@@"
 
 name=${0##*/}
 if [ "${0##*/}" = "$0" ]; then
@@ -18,6 +19,7 @@ usage() {
     echo "       --include-path  - print filename to be included by Makefile"
     echo "    -i --init-project  - create initial files for your project (Makefile)"
     echo "       --list-versions - List installed versions"
+    echo "    -V --version       - Show yaamake's version'"
     echo
     echo "  options:"
     echo "    -Y --yaal YAAL     - yaal base dir if there is no yaal command in PATH"
@@ -277,6 +279,13 @@ while [ "$1" ]; do
                 echo "For adding submodule run: git submodule add https://github.com/raphendyr/yaal.git vendor/yaal"
                 exit 1
             fi
+            ;;
+        --version|-V)
+            echo "$name release $RELEASE"
+            echo ""
+            echo "yaamake makefile versions:"
+            list_versions | sed 's/^/  /'
+            exit 0
             ;;
         *)
             echo "ERROR: invalid argument: $1"
