@@ -23,7 +23,7 @@ TEENSY := $(call find_file,vendor/teensy/teensy_loader_cli/teensy_loader_cli)
 TEENSY_FLAGS = -v -w -mmcu=$(MCU)
 
 $(TEENSY):
-	$(error Yaamake was propably build without teensy support, so get teensy_loader_cli and point TEENSY to it)
+	$(error Yaamake was probably built without teensy support, so get teensy_loader_cli and point TEENSY to it)
 
 
 program_flash: $(TARGET).hex $(TEENSY)

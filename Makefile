@@ -23,9 +23,9 @@ $(TARGET)_install: $(TARGET).template.sh
 
 ifeq ($(NO_TEENSY),)
 $(TEENSY): $(TEENSY).c
-	@if test ! -e /usr/include/usb.h; then echo "WARNING: no /usr/include/usb.h, you propably need libusb-dev for next thing to work"; fi
+	$(if $(wildcard /usr/include/usb.h),,$(warning No /usr/include/usb.h, you probably need libusb-dev for the next thing to work))
 	@echo "Executing makefile for $(notdir $(TEENSY))"
-	cd $(dir $(TEENSY)); make OS=LINUX
+	cd $(dir $(TEENSY)); $(MAKE) OS=LINUX
 
 .PHONY: TEENSY_install
 TEENSY_install: $(TEENSY)
@@ -35,7 +35,7 @@ TEENSY_install: $(TEENSY)
 
 .PHONY: TEENSY_clean
 TEENSY_clean:
-	cd $(dir $(TEENSY)); make clean
+	cd $(dir $(TEENSY)); $(MAKE) clean
 
 build: $(TEENSY)
 install: TEENSY_install
