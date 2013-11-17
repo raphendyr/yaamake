@@ -1,0 +1,26 @@
+From: =?UTF-8?q?Jaakko=20Kantoj=C3=A4rvi?= <jaakko@n-1.fi>
+Date: Sun, 17 Nov 2013 02:36:01 +0200
+Subject: Use teensy-loader-cli instead of relative file
+
+---
+ makefile.d/program.mk | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+diff --git a/makefile.d/program.mk b/makefile.d/program.mk
+index 0e98579..ee41803 100644
+--- a/makefile.d/program.mk
++++ b/makefile.d/program.mk
+@@ -19,12 +19,9 @@ program_help:
+ ifeq ($(PROGRAMMER),teensy)
+ #--------- teensy ---------
+ 
+-TEENSY := $(call find_file,vendor/teensy/teensy_loader_cli/teensy_loader_cli)
++TEENSY := teensy-loader-cli
+ TEENSY_FLAGS = -v -w -mmcu=$(MCU)
+ 
+-$(TEENSY):
+-	$(error Yaamake was probably built without teensy support, so get teensy_loader_cli and point TEENSY to it)
+-
+ 
+ program_flash: $(TARGET).hex $(TEENSY)
+ 	$(call require,MCU TARGET)
