@@ -1,3 +1,11 @@
+yaamake (1.0.1-1) unstable; urgency=low
+
+  * Upstream release v1.0.1:
+   * Variables are required before targets
+   * Sizebefore and after do not work if not done vie shell
+
+ -- Jaakko Kantojärvi <jaakko@n-1.fi>  Sun, 17 Nov 2013 19:28:09 +0200
+
 yaamake (1.0-2) unstable; urgency=low
 
   * Use teensy-loader-cli instead of relative file
