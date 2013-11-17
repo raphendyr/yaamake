@@ -356,7 +356,7 @@ extcoff: $(TARGET).elf
 	$(call require,MCU OBJ TARGET)
 	@echo
 	@echo $(MSG_LINKING) $@
-	# LDLIBS needs to be after object files for some library stuff to work correctly
+# LDLIBS needs to be after object files for some library stuff to work correctly
 	$(LINK.o) -o $@ $^ $(LDLIBS)
 
 
