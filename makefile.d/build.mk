@@ -363,7 +363,6 @@ extcoff: $(TARGET).elf
 # Compile: create object files from C, C++ and assembly source files.
 .PRECIOUS : $(OBJ)
 override BUILD_REQUIRE = $(call require,MCU F_CPU)
-$(OBJDIR)/%.o : $(OBJDIR)
 
 
 $(OBJDIR)/%.o : %.c
@@ -441,12 +440,6 @@ $(OBJDIR)/%.o : %.S
 
 
 #======================================
-
-# Create object files directory
-$(OBJDIR):
-	mkdir $(OBJDIR)
-
-
 
 # Include the dependency files.
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
