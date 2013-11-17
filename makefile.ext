@@ -1,0 +1,72 @@
+# -*- makefile -*-
+#----------------------------------------------------------------------------
+# This is yaamake's makefile system. This makefile is splitted in multiple
+# sources for easier code maintainability.
+#
+# Originally these makefiles have been WinAVR Makefile Template written by
+# Eric B. Weddington, Jörg Wunsch, et al. which was released to the
+# Public Domain
+#
+# Additional material for that orginal makefile was written by:
+#  Peter Fleury
+#  Tim Henigan
+#  Colin O'Flynn
+#  Reiner Patommel
+#  Markus Pfaff
+#  Sander Pool
+#  Frederik Rouleau
+#  Carlos Lamas
+#
+# So huge thanks to above people for their great work. I hope our new work
+# would help them too.
+#
+#----------------------------------------------------------------------------
+# After including this file to your projects makefile,
+# following commands can be used:
+#
+# make all = Make software.
+#
+# make clean = Clean out built project files.
+#
+# make coff = Convert ELF to AVR COFF.
+#
+# make extcoff = Convert ELF to AVR Extended COFF.
+#
+# make program = Download the hex file to the device, using avrdude.
+#
+# make debug = Start either simulavr or avarice as specified for debugging, 
+#              with avr-gdb or avr-insight as the front end for debugging.
+#
+# make filename.s = Just compile filename.c into the assembler code only.
+#
+# make filename.i = Create a preprocessed source file for use in submitting
+#                   bug reports to the GCC project.
+#
+#
+# To rebuild project do "make clean" then "make all".
+#----------------------------------------------------------------------------
+
+
+# Get our path from directory this file was included from
+YAAMAKE := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
+
+
+# Include boards, as that should define MCU and F_CLOCK, if BOARD is used
+include $(YAAMAKE)/makefile.d/boards.mk
+
+# Include defines about project environment
+include $(YAAMAKE)/makefile.d/environment.mk
+
+# Find yaal and include it's makefiles
+include $(YAAMAKE)/makefile.d/yaal.mk
+
+# Include all printed strings
+include $(YAAMAKE)/makefile.d/messages.mk
+
+# Include common targets.
+include $(YAAMAKE)/makefile.d/common.mk
+
+# Include targets in categories
+include $(YAAMAKE)/makefile.d/build.mk
+include $(YAAMAKE)/makefile.d/debug.mk
+include $(YAAMAKE)/makefile.d/program.mk

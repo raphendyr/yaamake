@@ -4,3 +4,7 @@ debian/*.debhelper.log
 debian/*.substvars
 debian/yaamake*/
 dist/
+*~
+*.pyc
+yaamake
+yaamake_install
