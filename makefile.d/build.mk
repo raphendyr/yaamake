@@ -362,6 +362,7 @@ extcoff: $(TARGET).elf
 
 # Compile: create object files from C, C++ and assembly source files.
 .PRECIOUS : $(OBJ)
+$(OBJ) : $(firstword $(MAKEFILE_LIST))
 override BUILD_REQUIRE = $(call require,MCU F_CPU)
 
 
