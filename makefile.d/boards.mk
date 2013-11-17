@@ -41,6 +41,7 @@ ifeq ($(BOARD),arduino_lilypad328)
   BOARD_NAME ?= lilypad arduino w/ atmega328
   F_CLOCK ?= 8000000
   MCU ?= atmega328p
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_lilypad)
@@ -48,6 +49,7 @@ ifeq ($(BOARD),arduino_lilypad)
   BOARD_NAME ?= lilypad arduino w/ atmega168
   F_CLOCK ?= 8000000
   MCU ?= atmega168
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_uno)
@@ -55,6 +57,7 @@ ifeq ($(BOARD),arduino_uno)
   BOARD_NAME ?= arduino uno
   F_CLOCK ?= 16000000
   MCU ?= atmega328p
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_pro5v328)
@@ -62,6 +65,7 @@ ifeq ($(BOARD),arduino_pro5v328)
   BOARD_NAME ?= arduino pro or pro mini (5v, 16 mhz) w/ atmega328
   F_CLOCK ?= 16000000
   MCU ?= atmega328p
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_pro5v)
@@ -69,6 +73,7 @@ ifeq ($(BOARD),arduino_pro5v)
   BOARD_NAME ?= arduino pro or pro mini (5v, 16 mhz) w/ atmega168
   F_CLOCK ?= 16000000
   MCU ?= atmega168
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_pro328)
@@ -76,6 +81,7 @@ ifeq ($(BOARD),arduino_pro328)
   BOARD_NAME ?= arduino pro or pro mini (3.3v, 8 mhz) w/ atmega328
   F_CLOCK ?= 8000000
   MCU ?= atmega328p
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_pro)
@@ -83,6 +89,7 @@ ifeq ($(BOARD),arduino_pro)
   BOARD_NAME ?= arduino pro or pro mini (3.3v, 8 mhz) w/ atmega168
   F_CLOCK ?= 8000000
   MCU ?= atmega168
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_atmega8)
@@ -90,6 +97,7 @@ ifeq ($(BOARD),arduino_atmega8)
   BOARD_NAME ?= arduino ng or older w/ atmega8
   F_CLOCK ?= 16000000
   MCU ?= atmega8
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_atmega168)
@@ -97,6 +105,7 @@ ifeq ($(BOARD),arduino_atmega168)
   BOARD_NAME ?= arduino ng or older w/ atmega168
   F_CLOCK ?= 16000000
   MCU ?= atmega168
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_ethernet)
@@ -104,6 +113,7 @@ ifeq ($(BOARD),arduino_ethernet)
   BOARD_NAME ?= arduino ethernet
   F_CLOCK ?= 16000000
   MCU ?= atmega328p
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_atmega328)
@@ -111,6 +121,7 @@ ifeq ($(BOARD),arduino_atmega328)
   BOARD_NAME ?= arduino duemilanove w/ atmega328
   F_CLOCK ?= 16000000
   MCU ?= atmega328p
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_diecimila)
@@ -118,6 +129,7 @@ ifeq ($(BOARD),arduino_diecimila)
   BOARD_NAME ?= arduino diecimila or duemilanove w/ atmega168
   F_CLOCK ?= 16000000
   MCU ?= atmega168
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_micro)
@@ -125,6 +137,7 @@ ifeq ($(BOARD),arduino_micro)
   BOARD_NAME ?= arduino micro
   F_CLOCK ?= 16000000
   MCU ?= atmega32u4
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_mega)
@@ -132,6 +145,7 @@ ifeq ($(BOARD),arduino_mega)
   BOARD_NAME ?= arduino mega (atmega1280)
   F_CLOCK ?= 16000000
   MCU ?= atmega1280
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_mega2560)
@@ -139,6 +153,7 @@ ifeq ($(BOARD),arduino_mega2560)
   BOARD_NAME ?= arduino mega 2560 or mega adk
   F_CLOCK ?= 16000000
   MCU ?= atmega2560
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_lilypadusb)
@@ -146,6 +161,7 @@ ifeq ($(BOARD),arduino_lilypadusb)
   BOARD_NAME ?= lilypad arduino usb
   F_CLOCK ?= 8000000
   MCU ?= atmega32u4
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_leonardo)
@@ -153,6 +169,7 @@ ifeq ($(BOARD),arduino_leonardo)
   BOARD_NAME ?= arduino leonardo
   F_CLOCK ?= 16000000
   MCU ?= atmega32u4
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_esplora)
@@ -160,6 +177,7 @@ ifeq ($(BOARD),arduino_esplora)
   BOARD_NAME ?= arduino esplora
   F_CLOCK ?= 16000000
   MCU ?= atmega32u4
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_nano328)
@@ -167,6 +185,7 @@ ifeq ($(BOARD),arduino_nano328)
   BOARD_NAME ?= arduino nano w/ atmega328
   F_CLOCK ?= 16000000
   MCU ?= atmega328p
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_nano)
@@ -174,6 +193,7 @@ ifeq ($(BOARD),arduino_nano)
   BOARD_NAME ?= arduino nano w/ atmega168
   F_CLOCK ?= 16000000
   MCU ?= atmega168
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_mini328)
@@ -181,6 +201,7 @@ ifeq ($(BOARD),arduino_mini328)
   BOARD_NAME ?= arduino mini w/ atmega328
   F_CLOCK ?= 16000000
   MCU ?= atmega328p
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_mini)
@@ -188,6 +209,7 @@ ifeq ($(BOARD),arduino_mini)
   BOARD_NAME ?= arduino mini w/ atmega168
   F_CLOCK ?= 16000000
   MCU ?= atmega168
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_fio)
@@ -195,6 +217,7 @@ ifeq ($(BOARD),arduino_fio)
   BOARD_NAME ?= arduino fio
   F_CLOCK ?= 8000000
   MCU ?= atmega328p
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_bt328)
@@ -202,6 +225,7 @@ ifeq ($(BOARD),arduino_bt328)
   BOARD_NAME ?= arduino bt w/ atmega328
   F_CLOCK ?= 16000000
   MCU ?= atmega328p
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),arduino_bt)
@@ -209,6 +233,7 @@ ifeq ($(BOARD),arduino_bt)
   BOARD_NAME ?= arduino bt w/ atmega168
   F_CLOCK ?= 16000000
   MCU ?= atmega168
+  PROGRAMMER ?= arduino
 endif
 
 ifeq ($(BOARD),avr-mt128)
