@@ -255,13 +255,22 @@ ELFSIZE = $(SIZE) --mcu=$(MCU) --format=avr $(TARGET).elf
 .PHONY: sizebefore sizeafter
 sizebefore:
 	$(call require,TARGET)
-	$(if $(wildcard $(TARGET).elf),@echo $(MSG_SIZE_BEFORE),)
-	$(if $(wildcard $(TARGET).elf),$(ELFSIZE),)
+	@if test -f $(TARGET).elf; then \
+		echo; \
+		echo $(MSG_SIZE_BEFORE); \
+		$(ELFSIZE); \
+		2>/dev/null; \
+		echo; \
+	fi
 
 sizeafter:
 	$(call require,TARGET)
-	$(if $(wildcard $(TARGET).elf),@echo $(MSG_SIZE_AFTER),)
-	$(if $(wildcard $(TARGET).elf),$(ELFSIZE),)
+	@if test -f $(TARGET).elf; then \
+		echo; \
+		echo $(MSG_SIZE_AFTER); \
+		$(ELFSIZE); 2>/dev/null; \
+		echo; \
+	fi
 
 
 
