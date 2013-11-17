@@ -1,3 +1,9 @@
+yaamake (1.0-2) unstable; urgency=low
+
+  * Use teensy-loader-cli instead of relative file
+
+ -- Jaakko Kantojärvi <jaakko@n-1.fi>  Sun, 17 Nov 2013 02:36:58 +0200
+
 yaamake (1.0-1) unstable; urgency=low
 
   * Initial Release.
