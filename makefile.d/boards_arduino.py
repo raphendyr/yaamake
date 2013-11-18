@@ -35,8 +35,8 @@ if __name__ == '__main__':
     boards = tree.keys()
     boards.sort()
 
-    print  "BOARD               MCU         F_CLOCK     ARDUINO_BOARD   PROGRAMMER  BOARD_NAME"
-    fmt = "{board:<19} {mcu:<11} {f_cpu:<11} {variant:<15} -           \"{name}\""
+    print  "BOARD               MCU         F_CLOCK     ARDUINO_BOARD     PROGRAMMER  PROGRAMMER_BAUD  BOARD_NAME"
+    fmt = "{board:<19} {mcu:<11} {f_cpu:<11} {variant:<17} {prog:<11} {baud:<16} \"{name}\""
 
     for board in boards:
         core = tree[board].get('build', {}).get('core', '').lower()
@@ -53,6 +53,14 @@ if __name__ == '__main__':
                 variant = tree[board]['build']['variant']
             except KeyError:
                 variant = core
+            try:
+                prog = tree[board]['upload']['protocol']
+            except KeyError:
+                prog = '-'
+            try:
+                baud = tree[board]['upload']['speed']
+            except KeyError:
+                baud = '-'
 
             board_name = board.lower()
             if not board_name.startswith(core):
@@ -63,6 +71,8 @@ if __name__ == '__main__':
                 mcu=tree[board]['build']['mcu'].lower(),
                 f_cpu=f_cpu.lower().rstrip('ul'),
                 variant=variant.lower(),
+                prog=prog,
+                baud=baud,
             )
         except KeyError as e:
             print "# {} - skipped, invalid data: {}".format(board, e)
