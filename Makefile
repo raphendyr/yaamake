@@ -30,7 +30,7 @@ $(TEENSY): $(TEENSY).c
 .PHONY: TEENSY_install
 TEENSY_install: $(TEENSY)
 	install -Dd $(LIBDIR)/$(dir $(TEENSY))
-	cp -r $(dir $(TEENSY)) $(LIBDIR)/$(dir $(TEENSY))
+	cp -r $(dir $(TEENSY))/* $(LIBDIR)/$(dir $(TEENSY))
 	chmod +x $(LIBDIR)/$(TEENSY)
 
 .PHONY: TEENSY_clean
