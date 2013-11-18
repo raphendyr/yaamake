@@ -5,6 +5,7 @@ environment_help:
 	$(HELP_TITTLE) environment
 	$(HELP_DESC) "This section defines common variables about your avr environment"
 	$(HELP_ATTRS)
+	$(HELP_ATTR) BOARD "Hardware board, use boards_list to knwo valid options"
 	$(HELP_ATTR) MCU "Microcontroller Chip Unit (e.q. attiny8) REQUIRED"
 	$(HELP_ATTR) F_CLOCK "Clock source's frequencys frequency."
 	$(HELP_ATTR) F_CPU "Processor frequency. (e.g. used by <util/delay.h>) [F_CLOCK]"

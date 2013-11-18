@@ -59,6 +59,7 @@ install: $(TARGET)_install
 	install -D -d $(LIBDIR)/$(VERSION)/makefile.d
 	install -T makefile.ext $(LIBDIR)/$(VERSION)/makefile.ext
 	install -D -t $(LIBDIR)/$(VERSION)/makefile.d $(shell find makefile.d -iname '*.mk')
+	install -D -t $(LIBDIR)/$(VERSION)/makefile.d makefile.d/boards.list
 
 	# Install binary components
 	install -D $(TARGET)_install $(BINDIR)/$(TARGET)
