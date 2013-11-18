@@ -1,3 +1,8 @@
+#   Stage 1: Variables
+ifeq ($(yaamake_stage),1)
+# =======================
+
+
 # Board defaults
 # ---------------
 
@@ -59,6 +64,12 @@ $(eval $(subst #,$(newline),$(shell awk -v col=BOARD -v 'row=$(BOARD)' -- '$(boa
 DEFS += $(if $(ARDUINO_BOARD),-DARDUINO_$(ARDUINO_BOARD),)
 
 
+
+#   Stage 2: targets
+else ifeq ($(yaamake_stage),2)
+# ============================
+
+
 .PHONY: info
 info:
 	@echo "BOARD: $(BOARD)"
@@ -74,3 +85,7 @@ boards_list:
 	@echo
 	@echo "all known boards:"
 	@awk -v col1=BOARD -v col2=BOARD_NAME -- '$(subst $(newline),,$(boards_get_colpair))' '$(YAAMAKE)/makefile.d/boards.list'
+
+
+# Stages end
+endif

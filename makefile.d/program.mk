@@ -1,3 +1,23 @@
+#   Stage 1: Variables
+ifeq ($(yaamake_stage),1)
+# =======================
+
+# Teensy
+TEENSY := $(call find_file,vendor/teensy/teensy_loader_cli/teensy_loader_cli)
+TEENSY_FLAGS = -v -w -mmcu=$(MCU)
+
+# Avrdude
+AVRDUDE ?= avrdude
+AVRDUDE_PORT ?= usb
+AVRDUDE_FLAGS = -p $(MCU) -P $(PROGRAMMER_PORT) -c $(PROGRAMMER)
+
+
+
+#   Stage 2: targets
+else ifeq ($(yaamake_stage),2)
+# ============================
+
+
 # programming help
 program_help:
 	$(HELP_TITTLE) programming
@@ -19,27 +39,17 @@ program_help:
 ifeq ($(PROGRAMMER),teensy)
 #--------- teensy ---------
 
-TEENSY := $(call find_file,vendor/teensy/teensy_loader_cli/teensy_loader_cli)
-TEENSY_FLAGS = -v -w -mmcu=$(MCU)
-
 $(TEENSY):
 	$(error Yaamake was probably built without teensy support, so get teensy_loader_cli and point TEENSY to it)
 
-
+.PHONY: program_flash
 program_flash: $(TARGET).hex $(TEENSY)
 	$(call require,MCU TARGET)
 	$(TEENSY) $(TEENSY_FLAGS) $<
 
 
-
 else
 #--------- avrdude ---------
-
-AVRDUDE ?= avrdude
-
-AVRDUDE_PORT ?= usb
-
-AVRDUDE_FLAGS = -p $(MCU) -P $(PROGRAMMER_PORT) -c $(PROGRAMMER)
 
 .PHONY: program_flash
 program_flash: $(TARGET).hex
@@ -52,9 +62,12 @@ program_eeprom: $(TARGET).eep
 	$(AVRDUDE) $(AVRDUDE_FLAGS) -U eeprom:w:$<
 
 
-
 endif
 
-#--------- common ---------
+# Alias program -> program_Flash
 .PHONY: program
 program: program_flash
+
+
+# Stages end
+endif

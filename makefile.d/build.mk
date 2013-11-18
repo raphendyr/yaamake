@@ -1,3 +1,10 @@
+#   Stage 1: Variables
+ifeq ($(yaamake_stage),1)
+# =======================
+
+
+
+
 # Common Compiler Options
 # -----------------------
 
@@ -185,6 +192,14 @@ COMPILE.cc = $(CXX) $(TARGET_ARCH) $(CXXFLAGS) $(CPPFLAGS)
 COMPILE.S = $(ASM) $(TARGET_ARCH) $(ASFLAGS) $(CPPFLAGS:%00UL=%00)
 
 LINK.o = $(CC) $(TARGET_ARCH) $(LDFLAGS) $(CPPFLAGS)
+
+
+
+
+
+#   Stage 2: targets
+else ifeq ($(yaamake_stage),2)
+# ============================
 
 
 
@@ -444,3 +459,8 @@ $(OBJDIR)/%.o : %.S
 
 # Include the dependency files.
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
+
+
+
+# Stages end
+endif

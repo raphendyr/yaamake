@@ -1,3 +1,8 @@
+#   Stage 1: Variables
+ifeq ($(yaamake_stage),1)
+# =======================
+
+
 # Define Messages
 
 
@@ -45,4 +50,8 @@ MSG_CLEANING = Cleaning project:
 MSG_CREATING_LIBRARY = Creating library:
 
 
+endif
+
+
+# Stages end
 endif

@@ -1,14 +1,9 @@
+#   Stage 1: Variables
+ifeq ($(yaamake_stage),1)
+# =======================
+
 # Board
 # -----
-
-environment_help:
-	$(HELP_TITTLE) environment
-	$(HELP_DESC) "This section defines common variables about your avr environment"
-	$(HELP_ATTRS)
-	$(HELP_ATTR) BOARD "Hardware board, use boards_list to knwo valid options"
-	$(HELP_ATTR) MCU "Microcontroller Chip Unit (e.q. attiny8) REQUIRED"
-	$(HELP_ATTR) F_CLOCK "Clock source's frequencys frequency."
-	$(HELP_ATTR) F_CPU "Processor frequency. (e.g. used by <util/delay.h>) [F_CLOCK]"
 
 # MCU clock (crystal) frequency (external or internal)
 #   This variable is similar to F_CPU, but defines original clock frequency.
@@ -67,3 +62,23 @@ COPY = cp
 ARCH := $(shell uname -p)
 # FIXME: I'm sure that there is better way to do this
 LANG := $(shell locale | grep -E '^(LANG|LANGUAGE|LC_MESSAGES|LC_ALL)' | cut -d '=' -f 2 | tr -d '"' | tr '[\n-_:]' ' ' | cut -d ' ' -f 1)
+
+
+
+#   Stage 2: targets
+else ifeq ($(yaamake_stage),2)
+# ============================
+
+
+environment_help:
+	$(HELP_TITTLE) environment
+	$(HELP_DESC) "This section defines common variables about your avr environment"
+	$(HELP_ATTRS)
+	$(HELP_ATTR) BOARD "Hardware board, use boards_list to knwo valid options"
+	$(HELP_ATTR) MCU "Microcontroller Chip Unit (e.q. attiny8) REQUIRED"
+	$(HELP_ATTR) F_CLOCK "Clock source's frequencys frequency."
+	$(HELP_ATTR) F_CPU "Processor frequency. (e.g. used by <util/delay.h>) [F_CLOCK]"
+
+
+# Stages end
+endif

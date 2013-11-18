@@ -1,3 +1,8 @@
+#   Stage 1: Variables
+ifeq ($(yaamake_stage),1)
+# =======================
+
+
 # FIXME: this file needs updating
 
 #---------------- Debugging Options ----------------
@@ -29,7 +34,9 @@ DEBUG_HOST = localhost
 
 
 
-#============================================================================
+#   Stage 2: targets
+else ifeq ($(yaamake_stage),2)
+# ============================
 
 
 # Generate avr-gdb config/init file which does the following:
@@ -61,3 +68,6 @@ else
 endif
 	@$(WINSHELL) /c start avr-$(DEBUG_UI) --command=$(GDBINIT_FILE)
 
+
+# Stages end
+endif
