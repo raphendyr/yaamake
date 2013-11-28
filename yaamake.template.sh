@@ -236,6 +236,18 @@ init_project() {
 
 ## Argument parsing
 
+get_arg() {
+    _t=$1 ; _a1=$2 ; _a2=$3
+    _a1c=${_a1#*=}
+    if [ "$_a1c" != "$_a1" ]; then
+        eval "$_t=$_a1c"
+        return 1
+    else
+        eval "$_t=$_a2"
+        return 0
+    fi
+}
+
 git_root=$(git rev-parse --show-toplevel 2>/dev/null || true)
 [ "$git_root" ] && git_root=$(readlink -e "$git_root")
 action=
@@ -252,12 +264,7 @@ while [ "$1" ]; do
             action=list_versions
             ;;
         --require|--require=*|-R|-R=*)
-            if [ "${1#*=}" != "$1" ]; then
-                require=${1#*=}
-            else
-                require=$2
-                shift
-            fi
+            get_arg require "$1" "$2" && shift
             ;;
         --init-project|-i)
             action=init_project
@@ -266,12 +273,7 @@ while [ "$1" ]; do
             make_initial=true
             ;;
         --yaal|--yaal=*|-Y|-Y=*)
-            if [ "${1#*=}" != "$1" ]; then
-                yaal=${1#*=}
-            else
-                yaal=$2
-                shift
-            fi
+            get_arg yaal "$1" "$2" && shift
             yaal_p=$(readlink -e "$yaal")
             if [ "$git_root" ] && [ "${yaal_p#$git_root}" = "${yaal_p}" ]; then
                 echo "You are linking to yaal, which is outside of your project directory."
