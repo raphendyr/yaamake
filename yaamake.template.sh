@@ -242,6 +242,7 @@ action=
 require=
 make_initial=false
 yaal=
+targets=
 while [ "$1" ]; do
     case "$1" in
         --include-path)
@@ -287,20 +288,32 @@ while [ "$1" ]; do
             list_versions | sed 's/^/  /'
             exit 0
             ;;
+        --)
+            shift
+            targets=$@
+            break
+            ;;
         *)
-            echo "ERROR: invalid argument: $1"
-            echo
-            usage
-            exit 2
+            targets="$targets${targets:+ }$1"
             ;;
     esac
     shift
 done
 
-if [ -z "$action" ]; then
+if [ "$action" ]; then
+    if [ "$targets" ]; then
+        echo "ERROR: invalid arguments: $targets"
+        echo
+        usage
+        exit 3
+    fi
+    $action
+    exit $?
+elif [ "$targets" ]; then
+    yaamakefile=$(include_path)
+    make -f "$yaamakefile" ${yaal:+"YAAL=$yaal"} $targets
+    exit $?
+else
     usage
     exit 1
 fi
-
-$action
-exit $?
