@@ -55,7 +55,13 @@ YAAMAKE := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
 
 include $(YAAMAKE)/makefile.d/functions.mk
 
-# Actual makefiles
+
+## User defaults
+-include $(HOME)/.yaamake.mk
+
+
+## Actual makefiles
+
 override define yaamake_include
 include $(YAAMAKE)/makefile.d/common.mk
 include $(YAAMAKE)/makefile.d/environment.mk
