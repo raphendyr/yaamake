@@ -63,6 +63,7 @@ install: $(TARGET)_install
 
 	# Install binary components
 	install -D $(TARGET)_install $(BINDIR)/$(TARGET)
+	install -D utils/serialconsole $(BINDIR)/yaamake-serialconsole
 
 .PHONY: uninstall
 uninstall:

@@ -65,6 +65,7 @@ include $(YAAMAKE)/makefile.d/boards.mk
 include $(YAAMAKE)/makefile.d/build.mk
 include $(YAAMAKE)/makefile.d/debug.mk
 include $(YAAMAKE)/makefile.d/program.mk
+include $(YAAMAKE)/makefile.d/communicating.mk
 include $(YAAMAKE)/makefile.d/yaal.mk
 endef
 
