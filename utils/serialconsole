@@ -156,17 +156,17 @@ _buffer_shift() { shift; echo $@; }
 buffer_get() {
     to=$2
     buffername="buffer_$1"
-    eval "buffer=\$$buffername"
+    eval "buffer=\"\$$buffername\""
     word=$(_buffer_first ${buffer})
     buffer=$(_buffer_shift ${buffer})
-    eval "$buffername=$buffer"
+    eval "$buffername='$buffer'"
     eval $to=$word;
 }
 buffer_add() {
     buffername="buffer_$1"
-    eval "buffer=\$$buffername"
+    eval "buffer=\"\$$buffername\""
     buffer="$buffer${buffer:+ }$2";
-    eval "$buffername=$buffer"
+    eval "$buffername='$buffer'"
 }
 
 
@@ -187,7 +187,7 @@ getc_nocsi() {
 
         if [ $csi -gt 0 -a $oct -eq 0 ]; then
             # escape stopped before end
-            oct=$(buffer_get $vname)
+            buffer_get $vname oct
         elif [ $csi -eq  0 ]; then
             if [ $oct -eq 033 ]; then # ESC
                 csi=1
@@ -201,8 +201,10 @@ getc_nocsi() {
                     buffer_add $vname $oct
                     oct=0
                 else
+                    # end of 2 char ansi escape sequence
+                    buffer=
+                    csi=0
                     oct=0
-                    break # end of 2 char ansi escape sequence
                 fi
             else
                 # not an asni escape sequence
@@ -211,10 +213,10 @@ getc_nocsi() {
             fi
         elif [ $csi -eq 2 ]; then
             if [ $oct -ge 100 -a $oct -le 176 ]; then # @ .. ~
-                # end (the command) byte of ansi escape sequence
+                # end of multi byte ansi escape sequence
                 buffer=
+                csi=0
                 oct=0
-                break # endi of multi byte ansi escape sequence
             else
                 # not the end byte
                 buffer_add $vname $oct
