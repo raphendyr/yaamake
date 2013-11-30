@@ -60,6 +60,9 @@ install: $(TARGET)_install
 	install -m 644 -T makefile.ext $(LIBDIR)/$(VERSION)/makefile.ext
 	install -m 644 -D -t $(LIBDIR)/$(VERSION)/makefile.d $(shell find makefile.d -iname '*.mk')
 	install -m 644 -D -t $(LIBDIR)/$(VERSION)/makefile.d makefile.d/boards.list
+	install -D -d $(LIBDIR)/$(VERSION)/lib
+	install -m 755 -D -t $(LIBDIR)/$(VERSION)/lib lib/boards_defines.py
+	install -m 755 -D -t $(LIBDIR)/$(VERSION)/lib lib/boards_list.py
 
 	# Install binary components
 	install -D $(TARGET)_install $(BINDIR)/$(TARGET)
