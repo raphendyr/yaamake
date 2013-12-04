@@ -74,6 +74,7 @@ uninstall:
 	-rm -rf "$(LIBDIR)"
 	# uninstall inary components
 	-rm -f "$(BINDIR)/$(TARGET)"
+	-rm -f "$(BINDIR)/yaamake-serialconsole"
 	@echo "Uninstaled all versions of yaamake under $(PREFIX)"
 
 
