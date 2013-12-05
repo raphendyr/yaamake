@@ -281,7 +281,7 @@ cat $port & printer=$!
 if ! $read_only; then
     if [ -w $port ]; then
         $enquiry && printf "\005" > $port
-        while $getter oct; do
+        while [ -w $port ] && $getter oct; do
             [ $oct -ge 040 -a $oct -lt 177 ] && printf "$cpre\\$oct$cpost"
             printf "\\$oct" > $port
         done
