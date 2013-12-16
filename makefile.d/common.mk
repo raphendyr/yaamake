@@ -1,5 +1,5 @@
-#   Stage 1: Variables
-ifeq ($(yaamake_stage),1)
+#   Stage: Variables
+ifeq ($(yaamake_stage),v)
 # =======================
 
 # Default target.
@@ -15,8 +15,8 @@ HELP_TARGET  := @printf   "    %-20s - %s\n"
 
 
 
-#   Stage 2: targets
-else ifeq ($(yaamake_stage),2)
+#   Stage: targets
+else ifeq ($(yaamake_stage),t)
 # ============================
 
 

@@ -1,5 +1,5 @@
-#   Stage 1: Variables
-ifeq ($(yaamake_stage),1)
+#   Stage: Variables
+ifeq ($(yaamake_stage),v)
 # =======================
 
 
@@ -21,8 +21,8 @@ DEFS += $(if $(ARDUINO_BOARD),-DARDUINO_$(ARDUINO_BOARD),)
 
 
 
-#   Stage 2: targets
-else ifeq ($(yaamake_stage),2)
+#   Stage: targets
+else ifeq ($(yaamake_stage),t)
 # ============================
 
 

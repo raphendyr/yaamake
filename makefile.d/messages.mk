@@ -1,5 +1,5 @@
-#   Stage 1: Variables
-ifeq ($(yaamake_stage),1)
+#   Stage: Variables
+ifeq ($(yaamake_stage),v)
 # =======================
 
 

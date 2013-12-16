@@ -75,12 +75,16 @@ include $(YAAMAKE)/makefile.d/communicating.mk
 include $(YAAMAKE)/makefile.d/yaal.mk
 endef
 
-# Stage 1: Variables
-override yaamake_stage := 1
+# Stage: Variables
+override yaamake_stage := v
 $(eval $(yaamake_include))
 
-# Stage 2: Targets
-override yaamake_stage := 2
+# Stage: Post-Variables / Pre-Targets
+override yaamake_stage := p
+$(eval $(yaamake_include))
+
+# Stage: Targets
+override yaamake_stage := t
 $(eval $(yaamake_include))
 
 override yaamake_stage :=
