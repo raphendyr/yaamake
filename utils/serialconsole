@@ -168,6 +168,10 @@ buffer_add() {
     buffer="$buffer${buffer:+ }$2";
     eval "$buffername='$buffer'"
 }
+buffer_clear() {
+    buffername="buffer_$1"
+    eval "$buffername="
+}
 
 
 ## Get 1 char from stdin, remove ansi escapes
@@ -202,7 +206,7 @@ getc_nocsi() {
                     oct=0
                 else
                     # end of 2 char ansi escape sequence
-                    buffer=
+                    buffer_clear $vname
                     csi=0
                     oct=0
                 fi
@@ -214,7 +218,7 @@ getc_nocsi() {
         elif [ $csi -eq 2 ]; then
             if [ $oct -ge 100 -a $oct -le 176 ]; then # @ .. ~
                 # end of multi byte ansi escape sequence
-                buffer=
+                buffer_clear $vname
                 csi=0
                 oct=0
             else
