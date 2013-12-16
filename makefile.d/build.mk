@@ -196,6 +196,39 @@ LINK.o = $(CC) $(TARGET_ARCH) $(LDFLAGS) $(CPPFLAGS)
 
 
 
+#   Stage: post-variables
+else ifeq ($(yaamake_stage),p)
+# ============================
+
+
+
+
+# Handle source outside of CWD using VPATH
+#  remove (../)+ pattern from file and add those patterns as VPATH paths
+#  NOTE: this will not work in cases whre SRC = ../main.cpp main.cpp
+#        as resulting SRC will be: main.cpp main.cpp
+#  There is no good way to handle ../ prefixed SRCs. This is best we can do...
+#  NOTE: you still can damn your self if you use paths like foobar/../../baz.cpp
+override SRC := $(foreach src,$(SRC),$(call drop_leading_cwd,$(src)))
+override _SRC_relative := $(filter ../%,$(SRC))
+override _SRC_relative_files := $(foreach src,$(_SRC_relative),$(call drop_leading_parent,$(src)))
+override _SRC_relative_vpath := $(foreach src,$(_SRC_relative),$(patsubst %$(call drop_leading_parent,$(src)),%,$(src)))
+override _SRC_absolute := $(patsubst /%,%,$(filter /%,$(SRC)))
+override SRC := $(filter-out /% ../%,$(SRC)) $(_SRC_relative_files) $(_SRC_absolute)
+
+# Validate filenames in SRC
+ifneq ($(call contains_duplicates,$(SRC)),)
+$(error Your SRC files include some duplicate filenames: $(SRC))
+endif
+
+# Build VPATH from one provided so far and ones from above
+# TODO: check that path exists (any need for that?)
+override VPATH := $(call remove_duplicates,$(VPATH) $(_SRC_relative_vpath) $(if $(_SRC_absolute),/,))
+
+
+
+
+
 
 #   Stage: targets
 else ifeq ($(yaamake_stage),t)
