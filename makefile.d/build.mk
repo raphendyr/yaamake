@@ -8,10 +8,8 @@ ifeq ($(yaamake_stage),v)
 # Common Compiler Options
 # -----------------------
 
-# Standard
+# Standards
 CSTANDARD ?= -std=c99
-
-# yaal requires c++11, so we default to it
 CXXSTANDARD ?= -std=c++11
 
 # Place your -D or -U options here
@@ -245,8 +243,8 @@ build_help:
 	$(HELP_TITTLE) compiling
 	$(HELP_DESC) "This section is used to compile your sourecode into bytecode"
 	$(HELP_ATTRS)
-	$(HELP_ATTR) SRC "list of sourcefiles (main.* and TARGET.* are used if none given)"
-	$(HELP_ATTR) TARGET "target filename prefix, seults TARGET.hex etc. (we use current directory name if none given"
+	$(HELP_ATTR) SRC "list of sourcefiles [first of main.* and TARGET.*]"
+	$(HELP_ATTR) TARGET "target filename prefix, seults TARGET.hex etc. [current directory name]"
 	$(HELP_ATTR) EXTRAINCDIRS "Any extra directories to look for include files."
 	$(HELP_ATTR) EXTRALIBDIRS "Any extra directories to look for libraries."
 	$(HELP_ATTR) BUILDDIR "Directory for containing build time files (objects, etc). [CACHEDIR/build]"
@@ -418,28 +416,28 @@ $(BUILDDIR)/%.o : %.c
 	$(BUILD_REQUIRE)
 	@echo
 	@echo $(MSG_COMPILING) $<
-	@mkdir -p $(dir $@)
+	@mkdir -p $(@D)
 	$(COMPILE.c) -c -o $@ $<
 
 $(BUILDDIR)/%.o : %.cpp
 	$(BUILD_REQUIRE)
 	@echo
 	@echo $(MSG_COMPILING_CPP) $<
-	@mkdir -p $(dir $@)
+	@mkdir -p $(@D)
 	$(COMPILE.cc) -c -o $@ $<
 
 $(BUILDDIR)/%.o : %.cc
 	$(BUILD_REQUIRE)
 	@echo
 	@echo $(MSG_COMPILING_CPP) $<
-	@mkdir -p $(dir $@)
+	@mkdir -p $(@D)
 	$(COMPILE.cc) -c -o $@ $<
 
 $(BUILDDIR)/%.o : %.S
 	$(BUILD_REQUIRE)
 	@echo
 	@echo $(MSG_ASSEMBLING) $<
-	@mkdir -p $(dir $@)
+	@mkdir -p $(@D)
 	$(COMPILE.S) -c -o $@ $<
 
 
