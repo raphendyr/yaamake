@@ -41,6 +41,9 @@ SRC ?= $(SRC_MAIN)
 
 override SRC_ERROR_MSG := No file matching main.* nor TARGET.* were found, also no SRC was specified in Makefile.
 
+# Cache directory for local build time caching and other yaamake caching
+override CACHEDIR := $(if $(CACHEDIR),$(CACHEDIR),.cache)
+
 
 # Commands
 # --------
@@ -56,6 +59,7 @@ NM = avr-nm
 REMOVE = rm -f
 REMOVEDIR = rm -rf
 COPY = cp
+FIND ?= find
 
 # Env info
 # --------
@@ -78,6 +82,7 @@ environment_help:
 	$(HELP_ATTR) MCU "Microcontroller Chip Unit (e.q. attiny8) REQUIRED"
 	$(HELP_ATTR) F_CLOCK "Clock source's frequencys frequency."
 	$(HELP_ATTR) F_CPU "Processor frequency. (e.g. used by <util/delay.h>) [F_CLOCK]"
+	$(HELP_ATTR) CACHEDIR "Directory for local caching of build files etc. [.cache]"
 
 
 # Stages end

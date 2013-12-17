@@ -21,7 +21,9 @@ else ifeq ($(yaamake_stage),t)
 
 ifneq ($(YAAL),)
 # include yaal specific targets
+OBJDIR := $(BUILDDIR)
 -include $(YAAL)/yaal_targets.mk
+OBJDIR :=
 endif
 
 

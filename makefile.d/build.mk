@@ -20,10 +20,9 @@ CXXSTANDARD ?= -std=c++11
 # Output format. (can be srec, ihex, binary)
 FORMAT ?= ihex
 
-# Object files directory
-#     To put object files in current directory, use a dot (.), do NOT make
-#     this an empty or blank macro!
-OBJDIR ?= obj
+# Build files directory
+#     To put object files in current directory, use a dot (.)
+override BUILDDIR := $(if $(BUILDDIR),$(BUILDDIR),$(CACHEDIR)/build)
 
 # Optimization level, can be [0, 1, 2, 3, s].
 #     0 = turn off optimization. s = optimize for size.
@@ -61,7 +60,7 @@ CPPFLAGS += -g$(DEBUG)
 CPPFLAGS += $(DEFS)
 CPPFLAGS += $(if $(F_CPU),-DF_CPU=$(patsubst %kHz,%000,$(patsubst %MHz,%000000,$(F_CPU:%UL=%)))UL,)
 CPPFLAGS += $(if $(F_CLOCK),-DF_CLOCK=$(patsubst %kHz,%000,$(patsubst %MHz,%000000,$(F_CLOCK:%UL=%)))UL,)
-CPPFLAGS += -MMD -MP -MF .dep/$(@F).d # generate dependency files.
+CPPFLAGS += -MMD -MP -MF $(patsubst %,%.dep,$(basename $@)$(suffix $<)) # generate dependency files.
 
 # optimizer options
 COFLAGS += -O$(OPT)
@@ -180,7 +179,7 @@ LDLIBS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 # Commons
 # -------
 # Define all object files.
-OBJ = $(patsubst %,$(OBJDIR)/%.o,$(basename $(SRC)))
+OBJ = $(patsubst %,$(BUILDDIR)/%.o,$(basename $(SRC)))
 
 # Commands
 #CC = from environment.mk
@@ -250,6 +249,7 @@ build_help:
 	$(HELP_ATTR) TARGET "target filename prefix, seults TARGET.hex etc. (we use current directory name if none given"
 	$(HELP_ATTR) EXTRAINCDIRS "Any extra directories to look for include files."
 	$(HELP_ATTR) EXTRALIBDIRS "Any extra directories to look for libraries."
+	$(HELP_ATTR) BUILDDIR "Directory for containing build time files (objects, etc). [CACHEDIR/build]"
 	$(HELP_TARGETS)
 	$(HELP_TARGET) build "build project files"
 	$(HELP_TARGET) clean "clean build files"
@@ -277,11 +277,11 @@ clean_list:
 	$(if $(TARGET),$(REMOVE) $(TARGET).lss,)
 	$(if $(OBJ),$(REMOVE) $(OBJ),)
 	$(if $(OBJ),$(REMOVE) $(OBJ:%.o=%.lst),)
+	$(if $(SRC),$(REMOVE) $(patsubst %,$(BUILDDIR)/%.dep,$(SRC)),)
 	$(if $(SRC),$(REMOVE) $(addsuffix .s,$(basename $(SRC))),)
 	$(if $(SRC),$(REMOVE) $(addsuffix .d,$(basename $(SRC))),)
 	$(if $(SRC),$(REMOVE) $(addsuffix .i,$(basename $(SRC))),)
 	$(if $(SRC),$(REMOVE) $(addsuffix .m,$(basename $(SRC))),)
-	$(REMOVEDIR) .dep
 
 
 
@@ -414,28 +414,28 @@ $(OBJ) : $(firstword $(MAKEFILE_LIST))
 override BUILD_REQUIRE = $(call require,MCU F_CPU)
 
 
-$(OBJDIR)/%.o : %.c
+$(BUILDDIR)/%.o : %.c
 	$(BUILD_REQUIRE)
 	@echo
 	@echo $(MSG_COMPILING) $<
 	@mkdir -p $(dir $@)
 	$(COMPILE.c) -c -o $@ $<
 
-$(OBJDIR)/%.o : %.cpp
+$(BUILDDIR)/%.o : %.cpp
 	$(BUILD_REQUIRE)
 	@echo
 	@echo $(MSG_COMPILING_CPP) $<
 	@mkdir -p $(dir $@)
 	$(COMPILE.cc) -c -o $@ $<
 
-$(OBJDIR)/%.o : %.cc
+$(BUILDDIR)/%.o : %.cc
 	$(BUILD_REQUIRE)
 	@echo
 	@echo $(MSG_COMPILING_CPP) $<
 	@mkdir -p $(dir $@)
 	$(COMPILE.cc) -c -o $@ $<
 
-$(OBJDIR)/%.o : %.S
+$(BUILDDIR)/%.o : %.S
 	$(BUILD_REQUIRE)
 	@echo
 	@echo $(MSG_ASSEMBLING) $<
@@ -491,7 +491,7 @@ $(OBJDIR)/%.o : %.S
 #======================================
 
 # Include the dependency files.
--include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
+-include $(shell $(FIND) $(BUILDDIR) -type f -iname '*.dep' 2>/dev/null)
 
 
 

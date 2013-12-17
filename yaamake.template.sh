@@ -163,7 +163,7 @@ create_gitignore() {
 *.map
 *.sym
 *.lst
-.dep/
+.cache/
 GITIGNORE
             git add .gitignore
         )
