@@ -47,6 +47,25 @@ After that run `make` to build it and `make program` to flash your chip.
 
 If you are using teensy, remove parameter `NO_TEENSY=1` from above (building `teensy_loader_cli` requires libusb-dev or similar package).
 
+
+User defaults
+-------------
+
+You can create `~/.yaamake.mk` which will be included by yaamake when you run `make` in your project.
+This allows you to define personal style variables and to give default values to variables.
+
+For example:
+
+```makefile
+# Makefile defaults for yaamake
+
+COLORS := 1
+
+PORT ?= /dev/ttyUSB0
+YAAL ?= $(HOME)/custom/yaal/path
+```
+
+
 License and using
 -----------------
 

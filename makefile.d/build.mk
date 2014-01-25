@@ -1,10 +1,15 @@
+#   Stage: Variables
+ifeq ($(yaamake_stage),v)
+# =======================
+
+
+
+
 # Common Compiler Options
 # -----------------------
 
-# Standard
+# Standards
 CSTANDARD ?= -std=c99
-
-# yaal requires c++11, so we default to it
 CXXSTANDARD ?= -std=c++11
 
 # Place your -D or -U options here
@@ -13,10 +18,9 @@ CXXSTANDARD ?= -std=c++11
 # Output format. (can be srec, ihex, binary)
 FORMAT ?= ihex
 
-# Object files directory
-#     To put object files in current directory, use a dot (.), do NOT make
-#     this an empty or blank macro!
-OBJDIR ?= obj
+# Build files directory
+#     To put object files in current directory, use a dot (.)
+override BUILDDIR := $(if $(BUILDDIR),$(BUILDDIR),$(CACHEDIR)/build)
 
 # Optimization level, can be [0, 1, 2, 3, s].
 #     0 = turn off optimization. s = optimize for size.
@@ -54,7 +58,7 @@ CPPFLAGS += -g$(DEBUG)
 CPPFLAGS += $(DEFS)
 CPPFLAGS += $(if $(F_CPU),-DF_CPU=$(patsubst %kHz,%000,$(patsubst %MHz,%000000,$(F_CPU:%UL=%)))UL,)
 CPPFLAGS += $(if $(F_CLOCK),-DF_CLOCK=$(patsubst %kHz,%000,$(patsubst %MHz,%000000,$(F_CLOCK:%UL=%)))UL,)
-CPPFLAGS += -MMD -MP -MF .dep/$(@F).d # generate dependency files.
+CPPFLAGS += -MMD -MP -MF $(patsubst %,%.dep,$(basename $@)$(suffix $<)) # generate dependency files.
 
 # optimizer options
 COFLAGS += -O$(OPT)
@@ -173,7 +177,7 @@ LDLIBS += $(PRINTF_LIB) $(SCANF_LIB) $(MATH_LIB)
 # Commons
 # -------
 # Define all object files.
-OBJ = $(patsubst %,$(OBJDIR)/%.o,$(basename $(SRC)))
+OBJ = $(patsubst %,$(BUILDDIR)/%.o,$(basename $(SRC)))
 
 # Commands
 #CC = from environment.mk
@@ -189,6 +193,47 @@ LINK.o = $(CC) $(TARGET_ARCH) $(LDFLAGS) $(CPPFLAGS)
 
 
 
+#   Stage: post-variables
+else ifeq ($(yaamake_stage),p)
+# ============================
+
+
+
+
+# Handle source outside of CWD using VPATH
+#  remove (../)+ pattern from file and add those patterns as VPATH paths
+#  NOTE: this will not work in cases whre SRC = ../main.cpp main.cpp
+#        as resulting SRC will be: main.cpp main.cpp
+#  There is no good way to handle ../ prefixed SRCs. This is best we can do...
+#  NOTE: you still can damn your self if you use paths like foobar/../../baz.cpp
+override SRC := $(foreach src,$(SRC),$(call drop_leading_cwd,$(src)))
+override _SRC_relative := $(filter ../%,$(SRC))
+override _SRC_relative_files := $(foreach src,$(_SRC_relative),$(call drop_leading_parent,$(src)))
+override _SRC_relative_vpath := $(foreach src,$(_SRC_relative),$(patsubst %$(call drop_leading_parent,$(src)),%,$(src)))
+override _SRC_absolute := $(patsubst /%,%,$(filter /%,$(SRC)))
+override SRC := $(filter-out /% ../%,$(SRC)) $(_SRC_relative_files) $(_SRC_absolute)
+
+# Validate filenames in SRC
+ifneq ($(call contains_duplicates,$(SRC)),)
+$(error Your SRC files include some duplicate filenames: $(SRC))
+endif
+
+# Build VPATH from one provided so far and ones from above
+# TODO: check that path exists (any need for that?)
+override VPATH := $(call remove_duplicates,$(VPATH) $(_SRC_relative_vpath) $(if $(_SRC_absolute),/,))
+
+
+
+
+
+
+#   Stage: targets
+else ifeq ($(yaamake_stage),t)
+# ============================
+
+
+
+
 # ========================
 # targets for user to call
 # ========================
@@ -198,10 +243,11 @@ build_help:
 	$(HELP_TITTLE) compiling
 	$(HELP_DESC) "This section is used to compile your sourecode into bytecode"
 	$(HELP_ATTRS)
-	$(HELP_ATTR) SRC "list of sourcefiles (main.* and TARGET.* are used if none given)"
-	$(HELP_ATTR) TARGET "target filename prefix, seults TARGET.hex etc. (we use current directory name if none given"
+	$(HELP_ATTR) SRC "list of sourcefiles [first of main.* and TARGET.*]"
+	$(HELP_ATTR) TARGET "target filename prefix, seults TARGET.hex etc. [current directory name]"
 	$(HELP_ATTR) EXTRAINCDIRS "Any extra directories to look for include files."
 	$(HELP_ATTR) EXTRALIBDIRS "Any extra directories to look for libraries."
+	$(HELP_ATTR) BUILDDIR "Directory for containing build time files (objects, etc). [CACHEDIR/build]"
 	$(HELP_TARGETS)
 	$(HELP_TARGET) build "build project files"
 	$(HELP_TARGET) clean "clean build files"
@@ -229,11 +275,11 @@ clean_list:
 	$(if $(TARGET),$(REMOVE) $(TARGET).lss,)
 	$(if $(OBJ),$(REMOVE) $(OBJ),)
 	$(if $(OBJ),$(REMOVE) $(OBJ:%.o=%.lst),)
+	$(if $(SRC),$(REMOVE) $(patsubst %,$(BUILDDIR)/%.dep,$(SRC)),)
 	$(if $(SRC),$(REMOVE) $(addsuffix .s,$(basename $(SRC))),)
 	$(if $(SRC),$(REMOVE) $(addsuffix .d,$(basename $(SRC))),)
 	$(if $(SRC),$(REMOVE) $(addsuffix .i,$(basename $(SRC))),)
 	$(if $(SRC),$(REMOVE) $(addsuffix .m,$(basename $(SRC))),)
-	$(REMOVEDIR) .dep
 
 
 
@@ -356,42 +402,42 @@ extcoff: $(TARGET).elf
 	$(call require,MCU OBJ TARGET)
 	@echo
 	@echo $(MSG_LINKING) $@
-	# LDLIBS needs to be after object files for some library stuff to work correctly
+# LDLIBS needs to be after object files for some library stuff to work correctly
 	$(LINK.o) -o $@ $^ $(LDLIBS)
 
 
 # Compile: create object files from C, C++ and assembly source files.
 .PRECIOUS : $(OBJ)
+$(OBJ) : $(firstword $(MAKEFILE_LIST))
 override BUILD_REQUIRE = $(call require,MCU F_CPU)
-$(OBJDIR)/%.o : $(OBJDIR)
 
 
-$(OBJDIR)/%.o : %.c
+$(BUILDDIR)/%.o : %.c
 	$(BUILD_REQUIRE)
 	@echo
 	@echo $(MSG_COMPILING) $<
-	@mkdir -p $(dir $@)
+	@mkdir -p $(@D)
 	$(COMPILE.c) -c -o $@ $<
 
-$(OBJDIR)/%.o : %.cpp
+$(BUILDDIR)/%.o : %.cpp
 	$(BUILD_REQUIRE)
 	@echo
 	@echo $(MSG_COMPILING_CPP) $<
-	@mkdir -p $(dir $@)
+	@mkdir -p $(@D)
 	$(COMPILE.cc) -c -o $@ $<
 
-$(OBJDIR)/%.o : %.cc
+$(BUILDDIR)/%.o : %.cc
 	$(BUILD_REQUIRE)
 	@echo
 	@echo $(MSG_COMPILING_CPP) $<
-	@mkdir -p $(dir $@)
+	@mkdir -p $(@D)
 	$(COMPILE.cc) -c -o $@ $<
 
-$(OBJDIR)/%.o : %.S
+$(BUILDDIR)/%.o : %.S
 	$(BUILD_REQUIRE)
 	@echo
 	@echo $(MSG_ASSEMBLING) $<
-	@mkdir -p $(dir $@)
+	@mkdir -p $(@D)
 	$(COMPILE.S) -c -o $@ $<
 
 
@@ -442,11 +488,10 @@ $(OBJDIR)/%.o : %.S
 
 #======================================
 
-# Create object files directory
-$(OBJDIR):
-	mkdir $(OBJDIR)
-
-
-
 # Include the dependency files.
--include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
+-include $(shell $(FIND) $(BUILDDIR) -type f -iname '*.dep' 2>/dev/null)
+
+
+
+# Stages end
+endif

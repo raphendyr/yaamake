@@ -1,5 +1,23 @@
+#   Stage: Variables
+ifeq ($(yaamake_stage),v)
+# =======================
+
 # Default target.
 .DEFAULT_GOAL := build
+
+# Help
+HELP_TITTLE  := @printf "\n%s:\n"
+HELP_DESC    := @printf   "  %s\n"
+HELP_ATTRS   := @printf "\n  attributes:\n"
+HELP_ATTR    := @printf   "    %-20s - %s\n"
+HELP_TARGETS := @printf "\n  actions:\n"
+HELP_TARGET  := @printf   "    %-20s - %s\n"
+
+
+
+#   Stage: targets
+else ifeq ($(yaamake_stage),t)
+# ============================
 
 
 # Print any variable requested
@@ -22,15 +40,7 @@ end:
 	@echo
 
 
-
 # Help
-HELP_TITTLE  = @printf "\n%s:\n"
-HELP_DESC    = @printf   "  %s\n"
-HELP_ATTRS   = @printf "\n  attributes:\n"
-HELP_ATTR    = @printf   "    %-20s - %s\n"
-HELP_TARGETS = @printf "\n  actions:\n"
-HELP_TARGET  = @printf   "    %-20s - %s\n"
-
 .PHONY: help common_help environment_help build_help program_help
 
 environment_help: common_help
@@ -39,3 +49,7 @@ program_help: build_help
 help: program_help
 common_help:
 	@echo "usage: make <action>"
+
+
+# Stages end
+endif

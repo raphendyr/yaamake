@@ -30,7 +30,7 @@ $(TEENSY): $(TEENSY).c
 .PHONY: TEENSY_install
 TEENSY_install: $(TEENSY)
 	install -Dd $(LIBDIR)/$(dir $(TEENSY))
-	cp -r $(dir $(TEENSY)) $(LIBDIR)/$(dir $(TEENSY))
+	cp -r $(dir $(TEENSY))/* $(LIBDIR)/$(dir $(TEENSY))
 	chmod +x $(LIBDIR)/$(TEENSY)
 
 .PHONY: TEENSY_clean
@@ -57,11 +57,16 @@ distclean:
 install: $(TARGET)_install
 	# Install library components
 	install -D -d $(LIBDIR)/$(VERSION)/makefile.d
-	install -T makefile.ext $(LIBDIR)/$(VERSION)/makefile.ext
-	install -D -t $(LIBDIR)/$(VERSION)/makefile.d $(shell find makefile.d -iname '*.mk')
+	install -m 644 -T makefile.ext $(LIBDIR)/$(VERSION)/makefile.ext
+	install -m 644 -D -t $(LIBDIR)/$(VERSION)/makefile.d $(shell find makefile.d -iname '*.mk')
+	install -m 644 -D -t $(LIBDIR)/$(VERSION)/makefile.d makefile.d/boards.list
+	install -D -d $(LIBDIR)/$(VERSION)/lib
+	install -m 755 -D -t $(LIBDIR)/$(VERSION)/lib lib/boards_defines.py
+	install -m 755 -D -t $(LIBDIR)/$(VERSION)/lib lib/boards_list.py
 
 	# Install binary components
 	install -D $(TARGET)_install $(BINDIR)/$(TARGET)
+	install -D utils/serialconsole $(BINDIR)/yaamake-serialconsole
 
 .PHONY: uninstall
 uninstall:
@@ -69,6 +74,7 @@ uninstall:
 	-rm -rf "$(LIBDIR)"
 	# uninstall inary components
 	-rm -f "$(BINDIR)/$(TARGET)"
+	-rm -f "$(BINDIR)/yaamake-serialconsole"
 	@echo "Uninstaled all versions of yaamake under $(PREFIX)"
 
 

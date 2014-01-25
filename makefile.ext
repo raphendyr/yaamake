@@ -56,18 +56,35 @@ YAAMAKE := $(patsubst %/,%,$(dir $(lastword $(MAKEFILE_LIST))))
 include $(YAAMAKE)/makefile.d/functions.mk
 
 
-## State 1: Variables
+## User defaults
+-include $(HOME)/.yaamake.mk
 
+
+## Actual makefiles
+
+override define yaamake_include
+include $(YAAMAKE)/makefile.d/common.mk
 include $(YAAMAKE)/makefile.d/environment.mk
 include $(YAAMAKE)/makefile.d/messages.mk
 include $(YAAMAKE)/makefile.d/boards.mk
-include $(YAAMAKE)/makefile.d/yaal_variables.mk
 
-
-## State 2: Targets
-
-include $(YAAMAKE)/makefile.d/common.mk
 include $(YAAMAKE)/makefile.d/build.mk
 include $(YAAMAKE)/makefile.d/debug.mk
 include $(YAAMAKE)/makefile.d/program.mk
-include $(YAAMAKE)/makefile.d/yaal_targets.mk
+include $(YAAMAKE)/makefile.d/communicating.mk
+include $(YAAMAKE)/makefile.d/yaal.mk
+endef
+
+# Stage: Variables
+override yaamake_stage := v
+$(eval $(yaamake_include))
+
+# Stage: Post-Variables / Pre-Targets
+override yaamake_stage := p
+$(eval $(yaamake_include))
+
+# Stage: Targets
+override yaamake_stage := t
+$(eval $(yaamake_include))
+
+override yaamake_stage :=

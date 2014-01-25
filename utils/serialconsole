@@ -1,0 +1,298 @@
+#!/bin/sh
+
+
+## Usage and cmdline parsing
+
+usage() {
+    echo "usage: ${0##*/} [options] <serial_port> [baudrate]"
+    echo "options:"
+    echo "  -h --help           show this help"
+    echo "  -N --no-escapes     remove ansi escape sequences (like up arrow)"
+    echo "  -r --readonly       do not write keypresses to device"
+    echo "  -e --enquiry        send ENQUIRY (char 005) to the device (presume device to send help/hello/etc)"
+    echo "  -c --colors=COLOR   use colors (use this to make a difference between input and output)"
+    echo "  -m MODE --mode=MODE Serial device mode. Accepted regular expression: [78][NEOneo][12]. Default is 8n1"
+    echo ""
+    echo "  <serial_port>       Serial port device. Should start with /dev/"
+    echo "  [baudrate]          Serial port baudrate (speed). Default is 9600"
+
+
+}
+
+error() {
+    echo "ERROR: $1"
+}
+
+usage_e() {
+    error "$1"
+    echo ""
+    usage
+}
+
+getter=getc
+read_only=false
+enquiry=false
+colors=
+colors_black=30
+colors_red=31
+colors_green=32
+colors_yellow=33
+colors_blue=34
+colors_magenta=35
+colors_cyan=36
+colors_white=37
+mode=8n1
+port=
+baud=9600
+parse_args() {
+    while [ "$1" ]; do
+        case "$1" in
+            --help|-h)
+                usage
+                exit 0
+                ;;
+            --no-escapes|-N)
+                getter=getc_nocsi
+                ;;
+            --readonly|-r)
+                read_only=true
+                ;;
+            --enquiry|-e)
+                enquiry=true
+                ;;
+            --colors|-c|--colors=*)
+                case "$1" in
+                    --colors=*) colors=${1#*=} ;;
+                    *)          colors=lblue   ;;
+                esac
+                ;;
+            --mode|-m|--mode=*|-m=*)
+                case "$1" in
+                    --mode|-m) mode=$2 ; shift ;;
+                    *)         mode=${1#*=} ;;
+                esac
+                ;;
+            /dev/*)
+                port=$1
+                ;;
+            [0-9]*)
+                baud=$1
+                ;;
+            *)
+                usage_e "Invalid argument $1"
+                exit 1
+                ;;
+        esac
+        shift
+    done
+
+    # validate serial mode
+    databits=$(expr substr $mode 1 1)
+    parity=$(expr substr $mode 2 1)
+    stopbits=$(expr substr $mode 3 1)
+    case "$databits" in
+        7) databits=cs7 ;;
+        8) databits=cs8 ;;
+        *) usage_e "Invalid data bits in mode $mode" ; exit 1 ;;
+    esac
+    case "$parity" in
+        n|N) parity="-parenb" ;;
+        e|E) parity="parenb -parodd" ;;
+        o|O) parity="parenb parodd" ;;
+        *) usage_e "Invalid parity flag in mode $mode" ; exit 1 ;;
+    esac
+    case "$stopbits" in
+        1) stopbits="-cstopb" ;;
+        2) stopbits="cstopb" ;;
+        *) usage_e "Invalid stop bits in mode $mode" ; exit 1 ;;
+    esac
+
+    # parse and validate colors
+    if [ "$colors" ]; then
+        read color_f color_b dummy <<EOF
+$(echo $colors | tr '_' ' ')
+EOF
+        colors=
+        if [ "${color_f#l}" != "$color_f" ]; then
+            colors="1"
+            color_f=${color_f#l}
+        fi
+        eval color_f=\$colors_$color_f
+        eval color_b=\$colors_$color_b
+        [ "$color_f" ] && colors=$colors${colors:+;}${color_f}
+        [ "$color_b" ] && colors=$colors${colors:+;}$(echo ${color_b} + 10 | bc)
+        if [ -z "$colors" ]; then
+            error "Invalid value for --colors."
+            echo  "Valid colors: black red green yellow blue magenta cyan white lred lgreen etc."
+            exit 1
+        fi
+        cpre="${colors:+\033[${colors}m}"
+        cpost="${colors:+\033[0m}"
+    fi
+}
+
+
+## Get 1 char from stdin
+
+getc() {
+    vname=$1
+    dd_opts=$2
+    oct=0
+
+    # parse input
+    # presume stdin is in "raw" mode (reading single byte is possible)
+    read dummy oct << EOF
+$(dd bs=1 count=1 $dd_opts 2>/dev/null|od -b)
+EOF
+    [ "$oct" ] || oct=0
+    eval $vname=$oct
+}
+
+
+## Buffer for getc_nocsi
+
+_buffer_first() { echo $1; }
+_buffer_shift() { shift; echo $@; }
+buffer_get() {
+    to=$2
+    buffername="buffer_$1"
+    eval "buffer=\"\$$buffername\""
+    word=$(_buffer_first ${buffer})
+    buffer=$(_buffer_shift ${buffer})
+    eval "$buffername='$buffer'"
+    eval $to=$word;
+}
+buffer_add() {
+    buffername="buffer_$1"
+    eval "buffer=\"\$$buffername\""
+    buffer="$buffer${buffer:+ }$2";
+    eval "$buffername='$buffer'"
+}
+buffer_clear() {
+    buffername="buffer_$1"
+    eval "$buffername="
+}
+
+
+## Get 1 char from stdin, remove ansi escapes
+
+getc_nocsi() {
+    vname=$1
+    csi=0
+    oct=0
+
+    # get from buffer, if presemt
+    if [ "${buffer}" ]; then
+        buffer_get $vname oct
+    fi
+
+    while [ $oct -eq 0 ]; do
+        getc oct iflag=nonblock
+
+        if [ $csi -gt 0 -a $oct -eq 0 ]; then
+            # escape stopped before end
+            buffer_get $vname oct
+        elif [ $csi -eq  0 ]; then
+            if [ $oct -eq 033 ]; then # ESC
+                csi=1
+                buffer_add $vname $oct
+                oct=0
+            fi
+        elif [ $csi -eq 1 ]; then
+            if [ $oct -ge 100 -a $oct -le 137 ]; then # @ .. _
+                if [ $oct -eq 133 ]; then # [  more than 2 chars
+                    csi=2
+                    buffer_add $vname $oct
+                    oct=0
+                else
+                    # end of 2 char ansi escape sequence
+                    buffer_clear $vname
+                    csi=0
+                    oct=0
+                fi
+            else
+                # not an asni escape sequence
+                buffer_add $vname $oct
+                buffer_get $vname oct
+            fi
+        elif [ $csi -eq 2 ]; then
+            if [ $oct -ge 100 -a $oct -le 176 ]; then # @ .. ~
+                # end of multi byte ansi escape sequence
+                buffer_clear $vname
+                csi=0
+                oct=0
+            else
+                # not the end byte
+                buffer_add $vname $oct
+                oct=0
+            fi
+        fi
+    done
+
+    eval $vname=$oct
+}
+
+
+## Setup serial tty
+
+set_serial_stty() {
+    stty -F $port $baud $databits $stopbits $parity \
+        -crtscts -hup \
+        -clocal -echo raw
+}
+
+set_stdin_stty() {
+    # kind of raw mode
+    stty -echo -icanon -xcase min 1 time 0
+}
+
+printer=
+tty_opts=$(stty -g)
+cleanup() {
+    [ "$printer" ] && [ -e /proc/$printer ] && kill $printer || true
+    [ "$tty_opts" ] && stty $tty_opts
+    # detrap exit
+    trap '' EXIT
+    echo
+    exit 0
+}
+
+## main code
+
+parse_args "$@"
+
+# validate
+if [ -z "$port" ]; then
+    usage_e "No port given"
+    exit 1
+elif ! [ -e "$port" ]; then
+    echo "Port $port doesn't exists"
+    exit 1
+fi
+
+# trap
+trap cleanup EXIT HUP INT TERM
+
+echo "Opening serial connection... Quit pressing ^C (ctrl + c)."
+
+# stty
+set_serial_stty
+$read_only || set_stdin_stty
+
+cat $port & printer=$!
+
+# write
+if ! $read_only; then
+    if [ -w $port ]; then
+        $enquiry && printf "\005" > $port
+        while [ -w $port ] && $getter oct; do
+            [ $oct -ge 040 -a $oct -lt 177 ] && printf "$cpre\\$oct$cpost"
+            printf "\\$oct" > $port
+        done
+    else
+        echo "WARNING: You can't write to serial port. Opening it readonly."
+    fi
+fi
+
+wait
+exit 0

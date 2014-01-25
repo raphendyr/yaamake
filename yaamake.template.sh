@@ -163,7 +163,7 @@ create_gitignore() {
 *.map
 *.sym
 *.lst
-.dep/
+.cache/
 GITIGNORE
             git add .gitignore
         )
@@ -236,12 +236,25 @@ init_project() {
 
 ## Argument parsing
 
+get_arg() {
+    _t=$1 ; _a1=$2 ; _a2=$3
+    _a1c=${_a1#*=}
+    if [ "$_a1c" != "$_a1" ]; then
+        eval "$_t=$_a1c"
+        return 1
+    else
+        eval "$_t=$_a2"
+        return 0
+    fi
+}
+
 git_root=$(git rev-parse --show-toplevel 2>/dev/null || true)
 [ "$git_root" ] && git_root=$(readlink -e "$git_root")
 action=
 require=
 make_initial=false
 yaal=
+targets=
 while [ "$1" ]; do
     case "$1" in
         --include-path)
@@ -251,12 +264,7 @@ while [ "$1" ]; do
             action=list_versions
             ;;
         --require|--require=*|-R|-R=*)
-            if [ "${1#*=}" != "$1" ]; then
-                require=${1#*=}
-            else
-                require=$2
-                shift
-            fi
+            get_arg require "$1" "$2" && shift
             ;;
         --init-project|-i)
             action=init_project
@@ -265,12 +273,7 @@ while [ "$1" ]; do
             make_initial=true
             ;;
         --yaal|--yaal=*|-Y|-Y=*)
-            if [ "${1#*=}" != "$1" ]; then
-                yaal=${1#*=}
-            else
-                yaal=$2
-                shift
-            fi
+            get_arg yaal "$1" "$2" && shift
             yaal_p=$(readlink -e "$yaal")
             if [ "$git_root" ] && [ "${yaal_p#$git_root}" = "${yaal_p}" ]; then
                 echo "You are linking to yaal, which is outside of your project directory."
@@ -287,20 +290,32 @@ while [ "$1" ]; do
             list_versions | sed 's/^/  /'
             exit 0
             ;;
+        --)
+            shift
+            targets=$@
+            break
+            ;;
         *)
-            echo "ERROR: invalid argument: $1"
-            echo
-            usage
-            exit 2
+            targets="$targets${targets:+ }$1"
             ;;
     esac
     shift
 done
 
-if [ -z "$action" ]; then
+if [ "$action" ]; then
+    if [ "$targets" ]; then
+        echo "ERROR: invalid arguments: $targets"
+        echo
+        usage
+        exit 3
+    fi
+    $action
+    exit $?
+elif [ "$targets" ]; then
+    yaamakefile=$(include_path)
+    make -f "$yaamakefile" ${yaal:+"YAAL=$yaal"} $targets
+    exit $?
+else
     usage
     exit 1
 fi
-
-$action
-exit $?
