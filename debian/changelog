@@ -1,3 +1,19 @@
+yaamake (1.1.0-1) unstable; urgency=medium
+
+  * Upstream release v1.1.0:
+   * Support for relative (starting with ..) and absolute `SRC` files.
+   * Rebuild if project Makefile is changed.
+   * Support for user specific makefile ($HOME/.yaamake.mk).
+     * Use to configure variables like `COLOR` or `YAAL`.
+   * Implement simple serial communication using standard linux tools.
+   * Support programming on arduino boards (correct programming
+     information for `BOARD`s is included).
+   * Store all local temporary files in `.cache` (`CACHEDIR`).
+     * `OBJDIR` is now deprecated.
+   * You could say `yaamake build` instead of `make build`.
+
+ -- Jaakko Kantojärvi <jaakko@n-1.fi>  Sat, 25 Jan 2014 22:25:59 +0200
+
 yaamake (1.0.1-1) unstable; urgency=low
 
   * Upstream release v1.0.1:
