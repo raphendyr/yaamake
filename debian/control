@@ -2,7 +2,9 @@ Source: yaamake
 Section: electronics
 Priority: extra
 Maintainer: Jaakko Kantojärvi <jaakko@n-1.fi>
-Build-Depends: debhelper (>= 8.0.0), libusb-dev
+Build-Depends:
+ debhelper (>= 8.0.0),
+ dh-python,
 Standards-Version: 3.9.3
 Homepage: https://github.com/raphendyr/yaamake
 Vcs-Git: git://github.com/raphendyr/yaamake.git
@@ -10,8 +12,11 @@ Vcs-Browser: https://github.com/raphendyr/yaamake
 
 Package: yaamake
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, yaamake-makefiles
-Recommends: git
+Depends:
+ yaamake-makefiles,
+ ${misc:Depends},
+Suggests:
+ git,
 Description: Makefile system to build and program AVR projects
  Yaamake is handy makefile system to be used with gnu make
  for building and programming AVR projects. IT allows you to
@@ -25,14 +30,25 @@ Description: Makefile system to build and program AVR projects
 
 Package: yaamake-doc
 Architecture: all
+Section: doc
+Depends:
+ ${misc:Depends},
 Description: documentation for yaamake
  <insert long description, indented with spaces>
 
 Package: yaamake-makefiles1
-Architecture: all
 Provides: yaamake-makefiles
-Depends: make, avrdude, gcc-avr (>= 1:4.7.0)
-Recommends: teensy-loader-cli
+Architecture: all
+X-Python-Version: >= 2.6
+X-Python3-Version: >= 3.0
+Depends:
+ make,
+ gcc-avr,
+ avrdude,
+ ${python:Depends},
+ ${misc:Depends},
+Suggests:
+ teensy-loader-cli,
 Description: Actual makefiles for yaamake
  This package contains one version of yaamake's makefile system.
  You can have multiple different versions of these installed.
