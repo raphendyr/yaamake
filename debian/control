@@ -28,6 +28,22 @@ Description: Makefile system to build and program AVR projects
  .
  This package contains tool to find location of actual makefiles.
 
+Package: yaamake-serialconsole
+Architecture: all
+Depends:
+ ${misc:Depends},
+Enhances:
+ yaamake-makefiles1,
+Section: comm
+Description: Simple serial communication utility
+ Very simple shell tool using common linux utilities for
+ communicating with serial device like AVR microcontroller.
+ .
+ This software is designed to be trivial implementation of
+ serial communication program for yaamake-makefiles.
+ .
+ For better program, try minicom, tinyserial, picocom or similar.
+
 Package: yaamake-doc
 Architecture: all
 Section: doc
@@ -47,6 +63,8 @@ Depends:
  avrdude,
  ${python:Depends},
  ${misc:Depends},
+Recommends:
+ yaamake-serialconsole,
 Suggests:
  teensy-loader-cli,
 Description: Actual makefiles for yaamake
