@@ -1,3 +1,13 @@
+yaamake (1.1.1-1) unstable; urgency=low
+
+  * Fix python version requirement
+  * Upstream release v1.1.1:
+   * yaamake: Add missing --help option
+   * Support for gcc-avr 4.5
+   * Action to check avrdude connection
+
+ -- Jaakko Kantojärvi <jaakko@n-1.fi>  Fri, 31 Jan 2014 21:02:49 +0200
+
 yaamake (1.1.0-1) unstable; urgency=medium
 
   * Upstream release v1.1.0:
