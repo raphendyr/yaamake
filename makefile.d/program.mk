@@ -38,6 +38,7 @@ program_help:
 	$(HELP_TARGET) program_flash "flash your program (code) into device"
 	$(HELP_TARGET) program "alias for program_flash"
 	$(HELP_TARGET) program_eeprom "flash eeprom into your device"
+	$(HELP_TARGET) program_check "checks that device is programmable: correct PORT, MCU and PROGRAMMER values"
 
 
 
@@ -65,6 +66,11 @@ program_flash: $(TARGET).hex
 program_eeprom: $(TARGET).eep
 	$(call require,AVRDUDE MCU TARGET PROGRAMMER PROGRAMMER_PORT)
 	$(AVRDUDE) $(AVRDUDE_FLAGS) -U eeprom:w:$<
+
+.PHONY: program_check
+program_check:
+	$(call require,AVRDUDE MCU PROGRAMMER PROGRAMMER_PORT)
+	$(AVRDUDE) $(AVRDUDE_FLAGS)
 
 
 endif

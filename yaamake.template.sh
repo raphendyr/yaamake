@@ -19,6 +19,7 @@ usage() {
     echo "       --include-path  - print filename to be included by Makefile"
     echo "    -i --init-project  - create initial files for your project (Makefile)"
     echo "       --list-versions - List installed versions"
+    echo "    -h --help          - This help message"
     echo "    -V --version       - Show yaamake's version'"
     echo
     echo "  options:"
@@ -282,6 +283,10 @@ while [ "$1" ]; do
                 echo "For adding submodule run: git submodule add https://github.com/raphendyr/yaal.git vendor/yaal"
                 exit 1
             fi
+            ;;
+        --help|-h)
+            usage
+            exit 0
             ;;
         --version|-V)
             echo "$name release $RELEASE"
