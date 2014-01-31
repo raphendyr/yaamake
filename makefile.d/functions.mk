@@ -24,3 +24,8 @@ override drop_leading_parent = $(if $(filter ../%,$(1)),$(call drop_leading_pare
 override remove_duplicates = $(if $(1),$(strip $(word 1,$(1)) $(call remove_duplicates,$(filter-out $(word 1,$(1)),$(1)))))
 # contains duplicates
 override contains_duplicates = $(if $(1),$(if $(filter $(strip $(word 1,$(1))),$(wordlist 2,$(words $(1)),$(1))),yes,$(call contains_duplicates,$(wordlist 2,$(words $(1)),$(1)))),)
+
+
+
+# version compare
+override version_compare = $(shell $(PYTHON) -c "_=lambda v:tuple(map(int,v.split('.')));print 'yes' if _('$(1)') $(2) _('$(3)') else ''")

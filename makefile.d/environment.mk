@@ -49,6 +49,7 @@ override CACHEDIR := $(if $(CACHEDIR),$(CACHEDIR),.cache)
 # --------
 # FIXME: how user could overwrite these as make has it's own defaults?
 SHELL = sh
+PYTHON := python
 WINSHELL = cmd
 CC = avr-gcc
 OBJCOPY = avr-objcopy
@@ -60,6 +61,8 @@ REMOVE = rm -f
 REMOVEDIR = rm -rf
 COPY = cp
 FIND ?= find
+
+CCVERSION := $(shell $(CC) --version | grep ^gcc | sed 's/^.* //g')
 
 # Env info
 # --------

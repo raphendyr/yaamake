@@ -2,7 +2,10 @@
 ifeq ($(yaamake_stage),v)
 # =======================
 
+# Helper variables
+# ----------------
 
+CCVERSION_CPP11_OK := $(call version_compare version_compare,$(CCVERSION),>=,4.7)
 
 
 # Common Compiler Options
@@ -10,7 +13,7 @@ ifeq ($(yaamake_stage),v)
 
 # Standards
 CSTANDARD ?= -std=c99
-CXXSTANDARD ?= -std=c++11
+CXXSTANDARD ?= $(if $(CCVERSION_CPP11_OK),-std=c++11,-std=c++0x)
 
 # Place your -D or -U options here
 # DEFS +=
@@ -69,7 +72,7 @@ COFLAGS += -fpack-struct
 COFLAGS += -fshort-enums
 COFLAGS += -ffreestanding
 COFLAGS += -fno-exceptions
-COFLAGS += -flto # required here to have any effect on linking
+COFLAGS += $(if $(CCVERSION_CPP11_OK),-flto,) # required here to have any effect on linking
 #COFLAGS += -fno-unit-at-a-time
 
 # warning options
