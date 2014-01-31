@@ -9,6 +9,8 @@ Standards-Version: 3.9.3
 Homepage: https://github.com/raphendyr/yaamake
 Vcs-Git: git://github.com/raphendyr/yaamake.git
 Vcs-Browser: https://github.com/raphendyr/yaamake
+X-Python-Version: >= 2.6
+X-Python3-Version: >= 3.0
 
 Package: yaamake
 Architecture: all
@@ -55,8 +57,6 @@ Description: documentation for yaamake
 Package: yaamake-makefiles1
 Provides: yaamake-makefiles
 Architecture: all
-X-Python-Version: >= 2.6
-X-Python3-Version: >= 3.0
 Depends:
  make,
  gcc-avr,
