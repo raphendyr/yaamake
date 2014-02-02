@@ -1,1 +1,2 @@
 0001-Use-teensy-loader-cli-instead-of-relative-file.patch
+0002-Fix-invalid-gcc-version-check.patch

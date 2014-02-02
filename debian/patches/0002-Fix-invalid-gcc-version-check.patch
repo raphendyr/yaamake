@@ -1,0 +1,21 @@
+From: =?utf-8?q?Jaakko_Kantoj=C3=A4rvi?= <jaakko@n-1.fi>
+Date: Mon, 3 Feb 2014 00:24:05 +0200
+Subject: Fix invalid gcc version check
+
+---
+ makefile.d/environment.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/makefile.d/environment.mk b/makefile.d/environment.mk
+index 7e906ad..258fd22 100644
+--- a/makefile.d/environment.mk
++++ b/makefile.d/environment.mk
+@@ -62,7 +62,7 @@ REMOVEDIR = rm -rf
+ COPY = cp
+ FIND ?= find
+ 
+-CCVERSION := $(shell $(CC) --version | grep ^gcc | sed 's/^.* //g')
++CCVERSION := $(shell $(CC) --version|grep gcc|sed 's/^.* //g')
+ 
+ # Env info
+ # --------
