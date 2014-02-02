@@ -62,7 +62,7 @@ REMOVEDIR = rm -rf
 COPY = cp
 FIND ?= find
 
-CCVERSION := $(shell $(CC) --version | grep ^gcc | sed 's/^.* //g')
+CCVERSION := $(shell $(CC) --version|grep gcc|sed 's/^.* //g')
 
 # Env info
 # --------
