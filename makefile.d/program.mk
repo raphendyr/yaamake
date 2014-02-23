@@ -45,11 +45,8 @@ program_help:
 ifeq ($(PROGRAMMER),teensy)
 #--------- teensy ---------
 
-$(TEENSY):
-	$(error Yaamake was probably built without teensy support, so get teensy_loader_cli and point TEENSY to it)
-
 .PHONY: program_flash
-program_flash: $(TARGET).hex $(TEENSY)
+program_flash: $(TARGET).hex
 	$(call require,MCU TARGET)
 	$(TEENSY) $(TEENSY_FLAGS) $<
 
