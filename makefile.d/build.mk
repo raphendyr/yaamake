@@ -5,7 +5,7 @@ ifeq ($(yaamake_stage),v)
 # Helper variables
 # ----------------
 
-CCVERSION_CPP11_OK := $(call version_compare version_compare,$(CCVERSION),>=,4.7)
+CCVERSION_CPP11_OK := $(call version_compare,$(CCVERSION),>=,4.7)
 
 
 # Common Compiler Options
