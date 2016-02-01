@@ -29,6 +29,13 @@ usage() {
 }
 
 
+# Support OS X readlink without option -e
+READLINK="readlink"
+if [ "$(readlink --help 2>/dev/null)" != "" ]; then
+  READLINK="readlink -e"
+fi
+
+
 ## include-path & list-versions
 
 require_version() {
@@ -195,7 +202,7 @@ create_yaal_main() {
 init_project() {
     if ! $installed; then
         yaamake_path=${0%/*}
-        yaamake_p=$(readlink -e "$yaamake_path")
+        yaamake_p=$($READLINK "$yaamake_path")
         if [ "$git_root" ] && [ "${yaamake_p#$git_root}" = "${yaamake_p}" ]; then
             echo "You are executing yaamake out side of your project directory."
             echo "This would result setup where others could build the code."
@@ -250,7 +257,7 @@ get_arg() {
 }
 
 git_root=$(git rev-parse --show-toplevel 2>/dev/null || true)
-[ "$git_root" ] && git_root=$(readlink -e "$git_root")
+[ "$git_root" ] && git_root=$($READLINK "$git_root")
 action=
 require=
 make_initial=false
@@ -275,7 +282,7 @@ while [ "$1" ]; do
             ;;
         --yaal|--yaal=*|-Y|-Y=*)
             get_arg yaal "$1" "$2" && shift
-            yaal_p=$(readlink -e "$yaal")
+            yaal_p=$($READLINK "$yaal")
             if [ "$git_root" ] && [ "${yaal_p#$git_root}" = "${yaal_p}" ]; then
                 echo "You are linking to yaal, which is outside of your project directory."
                 echo "This would result setup where others could build the code."
